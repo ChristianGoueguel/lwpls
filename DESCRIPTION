@@ -17,9 +17,11 @@ Imports:
     parsnip,
     purrr,
     rlang,
-    rnirs,
+    rnirs (>= 1.9.18),
     tibble
 Suggests: 
     spelling
 Language: en-US
 Roxygen: list(markdown = TRUE)
+Remotes:  
+    github::mlesnoff/rnirs
