@@ -44,9 +44,7 @@
 #'   set_engine("rnirs") %>%
 #'   set_mode("classification") %>%
 #'   translate()
-#'
-#'
-#' @export
+#' @export lwpls
 lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
 
     args <- list(num_comp = rlang::enquo(num_comp), neighbors = rlang::enquo(neighbors))
@@ -61,7 +59,6 @@ lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
     )
 }
 
-#' @export
 print.lwpls <- function(x, ...) {
   cat("LWPLS Model Specification (", x$mode, ")\n\n", sep = "")
   parsnip::model_printer(x, ...)
@@ -75,9 +72,7 @@ print.lwpls <- function(x, ...) {
 
 # ------------------------------------------------------------------------------
 
-#' @export
 #' @param object lwpls model specification.
-#'
 #' @param parameters A 1-row tibble or named list with _main_
 #'  parameters to update. If the individual arguments are used,
 #'  these will supersede the values in `parameters`. Also, using
@@ -93,9 +88,7 @@ print.lwpls <- function(x, ...) {
 #' model
 #' update(model, neighbors = 1)
 #' update(model, neighbors = 1, fresh = TRUE)
-#' @method update lwpls
-#' @rdname lwpls
-#' @export
+
 update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors = NULL, fresh = FALSE, ...) {
     parsnip::update_dot_check(...)
 
