@@ -44,7 +44,7 @@
 #'   set_engine("rnirs") %>%
 #'   set_mode("classification") %>%
 #'   translate()
-#' @export lwpls
+#' @export
 lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
 
     args <- list(num_comp = rlang::enquo(num_comp), neighbors = rlang::enquo(neighbors))
@@ -59,6 +59,7 @@ lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
     )
 }
 
+#' @export
 print.lwpls <- function(x, ...) {
   cat("LWPLS Model Specification (", x$mode, ")\n\n", sep = "")
   parsnip::model_printer(x, ...)
@@ -88,7 +89,7 @@ print.lwpls <- function(x, ...) {
 #' model
 #' update(model, neighbors = 1)
 #' update(model, neighbors = 1, fresh = TRUE)
-
+#' @export
 update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors = NULL, fresh = FALSE, ...) {
     parsnip::update_dot_check(...)
 
@@ -120,7 +121,7 @@ update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors =
   }
 
 # ------------------------------------------------------------------------------
-
+#' @export
 check_args.lwpls <- function(object) {
 
   args <- lapply(object$args, rlang::eval_tidy)

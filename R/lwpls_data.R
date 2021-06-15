@@ -1,13 +1,14 @@
 # nocov
+#' @export
 make_lwpls_engine <- function() {
-  
+
   parsnip::set_new_model(model = "lwpls")
-  
+
   parsnip::set_model_mode(model = "lwpls", mode = "regression")
   parsnip::set_model_mode(model = "lwpls", mode = "classification")
-  
+
   # ------------------------------------------------------------------------------
-  
+
   parsnip::set_model_engine(model = "lwpls", mode = "regression", eng = "rnirs")
   parsnip::set_model_engine(model = "lwpls", mode = "classification", eng = "rnirs")
   parsnip::set_dependency(model = "lwpls", eng = "rnirs", pkg = "rnirs")
@@ -15,20 +16,20 @@ make_lwpls_engine <- function() {
   parsnip::set_model_arg(
     model = "lwpls",
     eng = "rnirs",
-    parsnip = "num_comp", 
-    original = "ncomp", 
-    func = list(pkg = "dials", fun = "num_comp", range = c(1, 20)), 
+    parsnip = "num_comp",
+    original = "ncomp",
+    func = list(pkg = "dials", fun = "num_comp", range = c(1, 20)),
     has_submodel = TRUE
   )
   parsnip::set_model_arg(
     model = "lwpls",
     eng = "rnirs",
-    parsnip = "neighbors", 
-    original = "k", 
-    func = list(pkg = "dials", fun = "neighbors", range = c(1, 15)), 
+    parsnip = "neighbors",
+    original = "k",
+    func = list(pkg = "dials", fun = "neighbors", range = c(1, 15)),
     has_submodel = FALSE
   )
-  
+
   parsnip::set_fit(
     model = "lwpls",
     eng = "rnirs",
@@ -51,7 +52,7 @@ make_lwpls_engine <- function() {
       defaults = list()
     )
   )
-  
+
   parsnip::set_encoding(
     model = "lwpls",
     eng = "rnirs",
@@ -74,7 +75,7 @@ make_lwpls_engine <- function() {
       allow_sparse_x = FALSE
     )
   )
-  
+
   parsnip::set_pred(
     model = "lwpls",
     eng = "rnirs",
@@ -107,7 +108,7 @@ make_lwpls_engine <- function() {
         )
       )
     )
-  
+
   parsnip::set_pred(
     model = "lwpls",
     eng = "rnirs",
@@ -124,7 +125,7 @@ make_lwpls_engine <- function() {
         )
       )
     )
-  
+
   parsnip::set_pred(
     model = "lwpls",
     eng = "rnirs",
@@ -141,7 +142,7 @@ make_lwpls_engine <- function() {
         )
       )
     )
-  
+
   parsnip::set_pred(
     model = "lwpls",
     eng = "rnirs",
@@ -158,7 +159,7 @@ make_lwpls_engine <- function() {
         )
       )
     )
-  
+
 }
 
 # nocov end
