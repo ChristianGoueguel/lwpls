@@ -4,11 +4,14 @@
 # lwpls
 
 <!-- badges: start -->
+
+[![Lifecycle:
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/workflows/R-CMD-check/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions)
 <!-- badges: end -->
 
-`lwpls` contains simple bindings to enable the parsnip package
-(tidymodels) to fit locally-weighted partial least squares models, for
-regression or classification tasks.
+`lwpls` is parsnip wrappers to fit locally-weighted partial least
+squares models, for regression or classification tasks.
 
 ## Installation
 
