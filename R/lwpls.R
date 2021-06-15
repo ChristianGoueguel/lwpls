@@ -1,32 +1,21 @@
-#' General Interface for Partial Least Squares (PLS)
+#' General Interface for Locally-Weighted Partial Least Squares (LWPLS)
 #'
-#' `pls()` is a way to generate a _specification_ of a model before
-#'  fitting and allows the model to be created using R. The main
-#'  arguments for the
-#'  model are:
+#' `lwpls()` is a way to generate a _specification_ of a model before fitting and
+#' allows the model to be created using R. The main arguments for the model are:
 #' \itemize{
-#'   \item \code{predictor_prop}: The proportion of predictors that are allowed
-#'   to affect each PLS loading.
-#'   \item \code{num_comp}: The number of PLS components to retain.
+#'  \item \code{num_comp}: The number of components to retain in the local PLS models.
+#'  \item \code{neighbors}: The number of neighbors considered at each prediction.
 #' }
-#' These arguments are converted to their specific names at the
-#'  time that the model is fit. Other options and argument can be
-#'  set using `set_engine()`. If left to their defaults
-#'  here (`NULL`), the values are taken from the underlying model
-#'  functions. If parameters need to be modified, `update()` can be used
-#'  in lieu of recreating the object from scratch.
 #'
 #' @param mode A single character string for the type of model.
-#'  Possible values for this model are "unknown", "regression", or
-#'  "classification".
-#' @param predictor_prop The maximum proportion of original predictors that can
-#'  have _non-zero_ coefficients for each PLS component (via regularization).
-#'  This value is used for all PLS components for X.
-#' @param num_comp The number of PLS components to retain.
+#' Possible values for this model are "unknown", "regression", or "classification".
+#' @param num_comp The number of components to retain in the local PLS models.
+#' @param neighbors The number of neighbors considered at each prediction.
+#'
 #' @details The model can be created using the `fit()` function using the
 #'  following _engines_:
 #' \itemize{
-#' \item \pkg{R}:  `"mixOmics"`  (the default)
+#' \item \pkg{R}:  `"rnirs"`  (the default)
 #' }
 #'
 #' @section Engine Details:
@@ -36,23 +25,23 @@
 #'  below.
 #'
 #' @examples
-#' pls(num_comp = 2, predictor_prop = 0.2) %>%
-#'   set_engine("mixOmics") %>%
+#' lwpls(num_comp = 2, neighbors = 2) %>%
+#'   set_engine("rnirs") %>%
 #'   set_mode("regression") %>%
 #'   translate()
 #'
-#' pls(num_comp = 2, predictor_prop = 1) %>%
-#'   set_engine("mixOmics") %>%
+#' lwpls(num_comp = 2, neighbors = 1) %>%
+#'   set_engine("rnirs") %>%
 #'   set_mode("classification") %>%
 #'   translate()
 #'
-#' pls(num_comp = 6) %>%
-#'   set_engine("mixOmics") %>%
+#' lwpls(num_comp = 6) %>%
+#'   set_engine("rnirs") %>%
 #'   set_mode("regression") %>%
 #'   translate()
 #'
-#' pls() %>%
-#'   set_engine("mixOmics") %>%
+#' lwpls() %>%
+#'   set_engine("rnirs") %>%
 #'   set_mode("classification") %>%
 #'   translate()
 #'
@@ -61,7 +50,7 @@
 lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
 
     args <- list(num_comp = rlang::enquo(num_comp), neighbors = rlang::enquo(neighbors))
-    
+
     parsnip::new_model_spec(
       "lwpls",
       args = args,
@@ -76,7 +65,7 @@ lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
 print.lwpls <- function(x, ...) {
   cat("LWPLS Model Specification (", x$mode, ")\n\n", sep = "")
   parsnip::model_printer(x, ...)
-  
+
   if (!is.null(x$method$fit$args)) {
     cat("Model fit template:\n")
     print(parsnip::show_call(x))
@@ -87,32 +76,36 @@ print.lwpls <- function(x, ...) {
 # ------------------------------------------------------------------------------
 
 #' @export
-#' @param object A PLS model specification.
+#' @param object lwpls model specification.
+#'
 #' @param parameters A 1-row tibble or named list with _main_
 #'  parameters to update. If the individual arguments are used,
 #'  these will supersede the values in `parameters`. Also, using
 #'  engine arguments in this object will result in an error.
-#' @param ... Not used for `update()`.
+#' @param num_comp The number of components to retain in the local PLS models.
+#' @param neighbors The number of neighbors considered at each prediction.
 #' @param fresh A logical for whether the arguments should be
 #'  modified in-place of or replaced wholesale.
+#' @param ... Not used for `update()`.
+#'
 #' @examples
-#' model <- pls(predictor_prop =  0.1)
+#' model <- lwpls(neighbors =  3)
 #' model
-#' update(model, predictor_prop = 1)
-#' update(model, predictor_prop = 1, fresh = TRUE)
-#' @method update pls
-#' @rdname pls
+#' update(model, neighbors = 1)
+#' update(model, neighbors = 1, fresh = TRUE)
+#' @method update lwpls
+#' @rdname lwpls
 #' @export
 update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors = NULL, fresh = FALSE, ...) {
     parsnip::update_dot_check(...)
-    
+
     if (!is.null(parameters)) {
       parameters <- parsnip::check_final_param(parameters)
     }
-    
+
     args <- list(neighbors = rlang::enquo(neighbors), num_comp  = rlang::enquo(num_comp))
     args <- parsnip::update_main_parameters(args, parameters)
-    
+
     if (fresh) {
       object$args <- args
     } else {
@@ -122,7 +115,7 @@ update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors =
       if (length(args) > 0)
         object$args[names(args)] <- args
     }
-    
+
     parsnip::new_model_spec(
       "lwpls",
       args = object$args,
@@ -136,11 +129,11 @@ update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors =
 # ------------------------------------------------------------------------------
 
 check_args.lwpls <- function(object) {
-  
+
   args <- lapply(object$args, rlang::eval_tidy)
-  
+
   if (is.numeric(args$num_comp) && args$num_comp < 0)
     rlang::abort("`num_comp` should be >= 1.")
-  
+
   invisible(object)
 }

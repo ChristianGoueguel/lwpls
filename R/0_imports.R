@@ -8,6 +8,6 @@
 # been loaded.
 
 .onLoad <- function(libname, pkgname) {
-  # This defines rotationforest in the model database
+  # This defines lwpls in the model database
   make_lwpls_engine()
 }

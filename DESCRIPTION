@@ -1,6 +1,6 @@
 Package: lwpls
 Type: Package
-Title: Parsnip Wrappers for Locally-Weighted Partial Least Squares (LWPLS)
+Title: Parsnip Wrappers For Locally-Weighted Partial Least Squares (LWPLS)
 Version: 0.1.0
 Author: Christian L. Goueguel
 Maintainer: Christian L. Goueguel <christian.goueguel@gmail.com>
@@ -10,3 +10,4 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/ChristianGoueguel/lwpls
 BugReports: https://github.com/ChristianGoueguel/lwpls/issues
+RoxygenNote: 7.1.1

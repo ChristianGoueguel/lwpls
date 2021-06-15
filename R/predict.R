@@ -24,3 +24,17 @@ single_class_preds <- function(results, object) {
   res$.pred_class <- factor(res$.pred_class, levels = object$lvl)
   res
 }
+
+smax <- function(x) exp(x)/sum(exp(x))
+
+single_prob_preds <- function(results, object) {
+  tmp_pred <- results$predict
+  n <- dim(tmp_pred)[1]
+  p <- dim(tmp_pred)[2]
+  ncomp <- dim(tmp_pred)[3]
+  tmp_pred <- tmp_pred[,,ncomp]
+  tmp_pred <- apply(tmp_pred, 1, smax)
+  tmp_pred <- tibble::as_tibble(t(tmp_pred))
+  names(tmp_pred) <- paste0(".pred_", names(tmp_pred))
+  tmp_pred
+}
