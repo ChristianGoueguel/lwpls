@@ -2,7 +2,13 @@
 % Please edit documentation in R/lwpls.R
 \name{lwpls}
 \alias{lwpls}
-\title{General Interface for Locally-Weighted Partial Least Squares (LWPLS)}
+\title{General Interface for Locally-Weighted Partial Least Squares (LWPLS)
+`lwpls()` is a way to generate a _specification_ of a model before fitting and
+allows the model to be created using R. The main arguments for the model are:
+\itemize{
+ \item \code{num_comp}: The number of components to retain in the local PLS models.
+ \item \code{neighbors}: The number of neighbors considered at each prediction.
+}}
 \usage{
 lwpls(mode = "unknown", num_comp = NULL, neighbors = NULL)
 }
@@ -15,6 +21,7 @@ Possible values for this model are "unknown", "regression", or "classification".
 \item{neighbors}{The number of neighbors considered at each prediction.}
 }
 \description{
+General Interface for Locally-Weighted Partial Least Squares (LWPLS)
 `lwpls()` is a way to generate a _specification_ of a model before fitting and
 allows the model to be created using R. The main arguments for the model are:
 \itemize{
@@ -30,7 +37,6 @@ The model can be created using the `fit()` function using the
 }
 }
 \section{Engine Details}{
-
 
 Engines may have pre-set default arguments when executing the
  model fit call. The possible model calls are shown in the Examples section

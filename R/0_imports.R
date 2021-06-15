@@ -13,10 +13,6 @@
 #' @export
 generics::tidy
 
-#' @importFrom magrittr %>%
-#' @export
-magrittr::`%>%`
-
 # ------------------------------------------------------------------------------
 
 # nocov start

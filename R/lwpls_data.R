@@ -1,5 +1,4 @@
 # nocov
-#' @export
 make_lwpls_engine <- function() {
 
   parsnip::set_new_model(model = "lwpls")
