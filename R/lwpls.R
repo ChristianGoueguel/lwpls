@@ -26,24 +26,8 @@
 #'
 #' @examples
 #' lwpls(num_comp = 2, neighbors = 2) %>%
-#'   set_engine("rnirs") %>%
-#'   set_mode("regression") %>%
-#'   translate()
-#'
-#' lwpls(num_comp = 2, neighbors = 1) %>%
-#'   set_engine("rnirs") %>%
-#'   set_mode("classification") %>%
-#'   translate()
-#'
-#' lwpls(num_comp = 6) %>%
-#'   set_engine("rnirs") %>%
-#'   set_mode("regression") %>%
-#'   translate()
-#'
-#' lwpls() %>%
-#'   set_engine("rnirs") %>%
-#'   set_mode("classification") %>%
-#'   translate()
+#'   parsnip::set_engine("rnirs") %>%
+#'   parsnip::set_mode("regression")
 #' @export
 lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
 
@@ -72,7 +56,8 @@ print.lwpls <- function(x, ...) {
 }
 
 # ------------------------------------------------------------------------------
-
+#' General Interface for Updating Models Parameters
+#'
 #' @param object lwpls model specification.
 #' @param parameters A 1-row tibble or named list with _main_
 #'  parameters to update. If the individual arguments are used,

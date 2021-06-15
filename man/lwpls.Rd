@@ -39,22 +39,6 @@ Engines may have pre-set default arguments when executing the
 
 \examples{
 lwpls(num_comp = 2, neighbors = 2) \%>\%
-  set_engine("rnirs") \%>\%
-  set_mode("regression") \%>\%
-  translate()
-
-lwpls(num_comp = 2, neighbors = 1) \%>\%
-  set_engine("rnirs") \%>\%
-  set_mode("classification") \%>\%
-  translate()
-
-lwpls(num_comp = 6) \%>\%
-  set_engine("rnirs") \%>\%
-  set_mode("regression") \%>\%
-  translate()
-
-lwpls() \%>\%
-  set_engine("rnirs") \%>\%
-  set_mode("classification") \%>\%
-  translate()
+  parsnip::set_engine("rnirs") \%>\%
+  parsnip::set_mode("regression")
 }
