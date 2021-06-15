@@ -25,6 +25,6 @@ Here is a simple model using a simulated data set contained in the
 package:
 
 ``` r
+library(rnirs)
 library(lwpls)
-## basic example code
 ```
