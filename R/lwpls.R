@@ -1,38 +1,30 @@
 #' General Interface for Locally-Weighted Partial Least Squares (LWPLS)
-#'
 #' `lwpls()` is a way to generate a _specification_ of a model before fitting and
 #' allows the model to be created using R. The main arguments for the model are:
 #' \itemize{
 #'  \item \code{num_comp}: The number of components to retain in the local PLS models.
 #'  \item \code{neighbors}: The number of neighbors considered at each prediction.
 #' }
-#'
 #' @param mode A single character string for the type of model.
 #' Possible values for this model are "unknown", "regression", or "classification".
 #' @param num_comp The number of components to retain in the local PLS models.
 #' @param neighbors The number of neighbors considered at each prediction.
-#'
 #' @details The model can be created using the `fit()` function using the
 #'  following _engines_:
 #' \itemize{
 #' \item \pkg{R}:  `"rnirs"`  (the default)
 #' }
-#'
 #' @section Engine Details:
-#'
 #' Engines may have pre-set default arguments when executing the
 #'  model fit call. The possible model calls are shown in the Examples section
 #'  below.
-#'
 #' @examples
 #' lwpls(num_comp = 2, neighbors = 2) %>%
 #'   parsnip::set_engine("rnirs") %>%
 #'   parsnip::set_mode("regression")
 #' @export
 lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
-
     args <- list(num_comp = rlang::enquo(num_comp), neighbors = rlang::enquo(neighbors))
-
     parsnip::new_model_spec(
       "lwpls",
       args = args,
@@ -42,12 +34,10 @@ lwpls <- function(mode = "unknown",  num_comp = NULL, neighbors = NULL) {
       engine = NULL
     )
 }
-
 #' @export
 print.lwpls <- function(x, ...) {
   cat("LWPLS Model Specification (", x$mode, ")\n\n", sep = "")
   parsnip::model_printer(x, ...)
-
   if (!is.null(x$method$fit$args)) {
     cat("Model fit template:\n")
     print(parsnip::show_call(x))
@@ -57,7 +47,6 @@ print.lwpls <- function(x, ...) {
 
 # ------------------------------------------------------------------------------
 #' General Interface for Updating Models Parameters
-#'
 #' @param object lwpls model specification.
 #' @param parameters A 1-row tibble or named list with _main_
 #'  parameters to update. If the individual arguments are used,
@@ -68,7 +57,6 @@ print.lwpls <- function(x, ...) {
 #' @param fresh A logical for whether the arguments should be
 #'  modified in-place of or replaced wholesale.
 #' @param ... Not used for `update()`.
-#'
 #' @examples
 #' model <- lwpls(neighbors =  3)
 #' model
@@ -77,14 +65,11 @@ print.lwpls <- function(x, ...) {
 #' @export
 update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors = NULL, fresh = FALSE, ...) {
     parsnip::update_dot_check(...)
-
     if (!is.null(parameters)) {
       parameters <- parsnip::check_final_param(parameters)
     }
-
     args <- list(neighbors = rlang::enquo(neighbors), num_comp  = rlang::enquo(num_comp))
     args <- parsnip::update_main_parameters(args, parameters)
-
     if (fresh) {
       object$args <- args
     } else {
@@ -94,7 +79,6 @@ update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors =
       if (length(args) > 0)
         object$args[names(args)] <- args
     }
-
     parsnip::new_model_spec(
       "lwpls",
       args = object$args,
@@ -106,13 +90,9 @@ update.lwpls <- function(object, parameters = NULL, num_comp = NULL, neighbors =
   }
 
 # ------------------------------------------------------------------------------
-#' @export
 check_args.lwpls <- function(object) {
-
   args <- lapply(object$args, rlang::eval_tidy)
-
   if (is.numeric(args$num_comp) && args$num_comp < 0)
     rlang::abort("`num_comp` should be >= 1.")
-
   invisible(object)
 }
