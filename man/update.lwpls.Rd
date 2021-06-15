@@ -16,9 +16,9 @@
 \arguments{
 \item{object}{lwpls model specification.}
 
-\item{parameters}{A 1-row tibble or named list with _main_
+\item{parameters}{A 1-row tibble or named list with \emph{main}
 parameters to update. If the individual arguments are used,
-these will supersede the values in `parameters`. Also, using
+these will supersede the values in \code{parameters}. Also, using
 engine arguments in this object will result in an error.}
 
 \item{num_comp}{The number of components to retain in the local PLS models.}
@@ -28,7 +28,7 @@ engine arguments in this object will result in an error.}
 \item{fresh}{A logical for whether the arguments should be
 modified in-place of or replaced wholesale.}
 
-\item{...}{Not used for `update()`.}
+\item{...}{Not used for \code{update()}.}
 }
 \description{
 General Interface for Updating Models Parameters
@@ -38,4 +38,5 @@ model <- lwpls(neighbors =  3)
 model
 update(model, neighbors = 1)
 update(model, neighbors = 1, fresh = TRUE)
+
 }
