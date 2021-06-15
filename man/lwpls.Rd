@@ -2,13 +2,7 @@
 % Please edit documentation in R/lwpls.R
 \name{lwpls}
 \alias{lwpls}
-\title{General Interface for Locally-Weighted Partial Least Squares (LWPLS)
-`lwpls()` is a way to generate a _specification_ of a model before fitting and
-allows the model to be created using R. The main arguments for the model are:
-\itemize{
- \item \code{num_comp}: The number of components to retain in the local PLS models.
- \item \code{neighbors}: The number of neighbors considered at each prediction.
-}}
+\title{General Interface for Locally-Weighted Partial Least Squares (LWPLS)}
 \usage{
 lwpls(mode = "unknown", num_comp = NULL, neighbors = NULL)
 }
@@ -22,29 +16,18 @@ Possible values for this model are "unknown", "regression", or "classification".
 }
 \description{
 General Interface for Locally-Weighted Partial Least Squares (LWPLS)
-`lwpls()` is a way to generate a _specification_ of a model before fitting and
-allows the model to be created using R. The main arguments for the model are:
-\itemize{
- \item \code{num_comp}: The number of components to retain in the local PLS models.
- \item \code{neighbors}: The number of neighbors considered at each prediction.
 }
-}
-\details{
-The model can be created using the `fit()` function using the
- following _engines_:
-\itemize{
-\item \pkg{R}:  `"rnirs"`  (the default)
-}
-}
-\section{Engine Details}{
-
-Engines may have pre-set default arguments when executing the
- model fit call. The possible model calls are shown in the Examples section
- below.
-}
-
 \examples{
-lwpls(num_comp = 2, neighbors = 2) \%>\%
+lwpls() \%>\%
+  parsnip::set_args(num_comp = 2, neighbors = 2) \%>\%
   parsnip::set_engine("rnirs") \%>\%
-  parsnip::set_mode("regression")
+  parsnip::set_mode("regression") \%>\%
+  parsnip::translate()
+
+lwpls() \%>\%
+  parsnip::set_args(num_comp = 5, neighbors = 3) \%>\%
+  parsnip::set_engine("rnirs") \%>\%
+  parsnip::set_mode("classification") \%>\%
+  parsnip::translate()
+
 }
