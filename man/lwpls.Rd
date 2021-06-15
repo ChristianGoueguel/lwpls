@@ -2,19 +2,9 @@
 % Please edit documentation in R/lwpls.R
 \name{lwpls}
 \alias{lwpls}
-\alias{update.lwpls}
 \title{General Interface for Locally-Weighted Partial Least Squares (LWPLS)}
 \usage{
 lwpls(mode = "unknown", num_comp = NULL, neighbors = NULL)
-
-\method{update}{lwpls}(
-  object,
-  parameters = NULL,
-  num_comp = NULL,
-  neighbors = NULL,
-  fresh = FALSE,
-  ...
-)
 }
 \arguments{
 \item{mode}{A single character string for the type of model.
@@ -23,18 +13,6 @@ Possible values for this model are "unknown", "regression", or "classification".
 \item{num_comp}{The number of components to retain in the local PLS models.}
 
 \item{neighbors}{The number of neighbors considered at each prediction.}
-
-\item{object}{lwpls model specification.}
-
-\item{parameters}{A 1-row tibble or named list with _main_
-parameters to update. If the individual arguments are used,
-these will supersede the values in `parameters`. Also, using
-engine arguments in this object will result in an error.}
-
-\item{fresh}{A logical for whether the arguments should be
-modified in-place of or replaced wholesale.}
-
-\item{...}{Not used for `update()`.}
 }
 \description{
 `lwpls()` is a way to generate a _specification_ of a model before fitting and
@@ -79,10 +57,4 @@ lwpls() \%>\%
   set_engine("rnirs") \%>\%
   set_mode("classification") \%>\%
   translate()
-
-
-model <- lwpls(neighbors =  3)
-model
-update(model, neighbors = 1)
-update(model, neighbors = 1, fresh = TRUE)
 }
