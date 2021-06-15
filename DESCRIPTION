@@ -1,12 +1,11 @@
 Package: lwpls
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Parsnip Wrappers for Locally-Weighted Partial Least Squares (LWPLS)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Christian L. Goueguel
+Maintainer: Christian L. Goueguel <christian.goueguel@gmail.com>
+Description: Bindings for locally-weighted partial least squares models for use with the parsnip package.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/ChristianGoueguel/lwpls
