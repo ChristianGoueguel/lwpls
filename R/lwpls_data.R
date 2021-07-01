@@ -1,13 +1,8 @@
-# nocov
 make_lwpls_engine <- function() {
 
   parsnip::set_new_model(model = "lwpls")
-
   parsnip::set_model_mode(model = "lwpls", mode = "regression")
   parsnip::set_model_mode(model = "lwpls", mode = "classification")
-
-  # ------------------------------------------------------------------------------
-
   parsnip::set_model_engine(model = "lwpls", mode = "regression", eng = "rnirs")
   parsnip::set_model_engine(model = "lwpls", mode = "classification", eng = "rnirs")
   parsnip::set_dependency(model = "lwpls", eng = "rnirs", pkg = "rnirs")
@@ -25,10 +20,17 @@ make_lwpls_engine <- function() {
     eng = "rnirs",
     parsnip = "neighbors",
     original = "k",
-    func = list(pkg = "dials", fun = "neighbors", range = c(1, 15)),
+    func = list(pkg = "dials", fun = "neighbors", range = c(1, 5)),
     has_submodel = FALSE
   )
-
+  parsnip::set_model_arg(
+    model = "lwpls",
+    eng = "rnirs",
+    parsnip = "shapefactor",
+    original = "h",
+    func = list(pkg = "rnirs", fun = "lwplsr", range = c(1, 10)),
+    has_submodel = FALSE
+  )
   parsnip::set_fit(
     model = "lwpls",
     eng = "rnirs",
@@ -160,5 +162,3 @@ make_lwpls_engine <- function() {
     )
 
 }
-
-# nocov end
