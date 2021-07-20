@@ -10,8 +10,7 @@
 [![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/workflows/R-CMD-check/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions)
 <!-- badges: end -->
 
-Parsnip wrappers to fit locally-weighted partial least squares models,
-for regression or classification tasks.
+Parsnip wrappers to fit locally-weighted partial least squares models.
 
 ## Installation
 
