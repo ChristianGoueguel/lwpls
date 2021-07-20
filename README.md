@@ -7,7 +7,6 @@
 
 <!-- badges: start -->
 
-badge\_lifecycle(“maturing”, “blue”)
 [![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/workflows/R-CMD-check/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions)
 <!-- badges: end -->
 
