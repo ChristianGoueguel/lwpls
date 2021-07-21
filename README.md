@@ -23,7 +23,4 @@ Install the development version from [GitHub](https://github.com/) with:
 devtools::install_github("ChristianGoueguel/lwpls")
 ```
 
-## Example
-
-Here is a simple model using a simulated data set contained in the
-package:
+Under construction…!
