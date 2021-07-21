@@ -6,7 +6,10 @@
 # lwpls
 
 <!-- badges: start -->
+
 [![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/workflows/R-CMD-check/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 Parsnip wrappers to fit locally-weighted partial least squares models.
