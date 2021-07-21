@@ -6,7 +6,6 @@
 # lwpls
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/workflows/R-CMD-check/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions)
 <!-- badges: end -->
 
