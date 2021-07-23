@@ -42,3 +42,5 @@ hexSticker::sticker(
   l_alpha = 0.5,
   filename = "inst/figures/pkg_sticker.png",
   )
+
+# usethis::use_logo(img = "inst/figures/pkg_sticker.png", geometry = "250x300", retina = TRUE)
