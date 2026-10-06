@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,9 +43,9 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="lwpls-development-version">lwpls (development version)<a class="anchor" aria-label="anchor" href="#lwpls-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.1" id="lwpls-021">lwpls 0.2.1<a class="anchor" aria-label="anchor" href="#lwpls-021"></a></h2>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-0-2-1">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-1"></a></h3>
 <ul><li><p>Robust LW-PLS: with <code>robust = TRUE</code> (an engine argument of <code><a href="../reference/lwpls.html">lwpls()</a></code> and an argument of <code><a href="../reference/lwpls_fit.html">lwpls_fit()</a></code>), each local model is fitted by partial robust M-regression (PRM; Serneels et al., 2005), with the Fair (default) or Hampel weight function. The medians and the L1-median that PRM uses are weighted by the similarity weights, so the robust models stay local. Robust models are available for regression with one or more outcomes and for classification, and they standardize the data and scale the distances with the median and the MAD.</p></li>
 <li><p>Sparse LW-PLS: the new <code>sparsity</code> argument (a tunable main argument of <code><a href="../reference/lwpls.html">lwpls()</a></code>, with the dials parameter <code><a href="../reference/sparsity.html">sparsity()</a></code>) fits the local models by sparse NIPALS (SNIPLS; Hoffmann et al., 2015), so that each local model selects its own predictors. Combined with <code>robust = TRUE</code>, it gives local sparse PRM (SPRM).</p></li>
 <li><p>New yardstick metric <code><a href="../reference/trimmed_rmse.html">trimmed_rmse()</a></code> to tune robust models on data with outliers.</p></li>
