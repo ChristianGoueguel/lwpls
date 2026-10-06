@@ -122,8 +122,8 @@ models;</li>
 similar, so LW-PLS tends to a global PLS model.</li>
 </ul>
 <p>Optionally, <code>neighbors</code> restricts each local model to the
-nearest training samples, which reduces the cost of each local model for
-large training sets.</p>
+nearest training samples (the “KNN-LW” strategy compared with the
+original LW-PLS by Lesnoff et al., 2020).</p>
 </div>
 <div class="section level2">
 <h2 id="regression-fat-free-water-content-of-meat-from-nir-spectra">Regression: fat-free water content of meat from NIR spectra<a class="anchor" aria-label="anchor" href="#regression-fat-free-water-content-of-meat-from-nir-spectra"></a>
@@ -252,9 +252,10 @@ baseline:</p>
 <div class="section level2">
 <h2 id="classification">Classification<a class="anchor" aria-label="anchor" href="#classification"></a>
 </h2>
-<p>For a factor outcome, LW-PLS models the class indicators (LW-PLS-DA).
-The predicted class is the one with the largest predicted indicator, and
-the indicators, truncated to
+<p>For a factor outcome, LW-PLS models the class indicators: this is
+locally weighted partial least squares-discriminant analysis (LW-PLS-DA,
+Bevilacqua and Marini, 2014). The predicted class is the one with the
+largest predicted indicator, and the indicators, truncated to
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>,
 give the class probabilities.</p>
 <p>Because every local model is linear but fitted around its own query,
@@ -473,6 +474,12 @@ off:</p>
 active pharmaceutical ingredients content using locally weighted partial
 least squares and statistical wavelength selection. <em>International
 Journal of Pharmaceutics</em>, 421(2), 269–274.</li>
+<li>Bevilacqua, M. and Marini, F. (2014). Local classification: Locally
+weighted-partial least squares-discriminant analysis (LW-PLS-DA).
+<em>Analytica Chimica Acta</em>, 838, 20–30.</li>
+<li>Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
+weighted PLS strategies for regression and discrimination on agronomic
+NIR data. <em>Journal of Chemometrics</em>, 34(5), e3209.</li>
 <li>Dayal, B. S. and MacGregor, J. F. (1997). Improved PLS algorithms.
 <em>Journal of Chemometrics</em>, 11(1), 73–85.</li>
 </ul>

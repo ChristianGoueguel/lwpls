@@ -128,9 +128,11 @@ is then fitted with weighted centering, weighted covariances and the
 query is projected onto its local latent space to obtain the prediction.</p>
 <p>When <code>neighbors</code> is set, only the <code>neighbors</code> closest training samples
 receive a non-zero weight and \(\sigma_d\) is computed over their
-distances.</p>
+distances. This is the "KNN-LW" strategy, which Lesnoff et al. (2020)
+compare with the original LW-PLS that weights all training samples.</p>
 <p>For classification, the outcome is converted to class indicator columns
-and modeled with a multi-response LW-PLS (LW-PLS-DA). The predicted class
+and modeled with a multi-response LW-PLS (LW-PLS-DA; Bevilacqua and Marini,
+2014). The predicted class
 is the one with the largest predicted indicator. Class probabilities are
 obtained by truncating the predicted indicators to <code>[0, 1]</code> and
 renormalizing them to sum to one.</p>
@@ -157,6 +159,12 @@ are converted to dummy variables when the model is fitted with a formula.</p>
 pharmaceutical ingredients content using locally weighted partial least
 squares and statistical wavelength selection. <em>International Journal of
 Pharmaceutics</em>, 421(2), 269–274. <a href="https://doi.org/10.1016/j.ijpharm.2011.10.007" class="external-link">doi:10.1016/j.ijpharm.2011.10.007</a></p>
+<p>Bevilacqua, M. and Marini, F. (2014). Local classification: Locally
+weighted-partial least squares-discriminant analysis (LW-PLS-DA).
+<em>Analytica Chimica Acta</em>, 838, 20–30. <a href="https://doi.org/10.1016/j.aca.2014.05.057" class="external-link">doi:10.1016/j.aca.2014.05.057</a></p>
+<p>Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
+weighted PLS strategies for regression and discrimination on agronomic NIR
+data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/10.1002/cem.3209" class="external-link">doi:10.1002/cem.3209</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
