@@ -33,6 +33,19 @@ check_positive <- function(x, arg, allow_null = FALSE, call = rlang::caller_env(
   invisible(x)
 }
 
+check_similarity <- function(x, allow_null = FALSE, call = rlang::caller_env()) {
+  if (is.null(x) && allow_null) {
+    return(invisible(NULL))
+  }
+  if (!rlang::is_string(x) || !x %in% values_similarity) {
+    cli::cli_abort(
+      "{.arg similarity} must be one of {.or {.val {values_similarity}}}, not {describe(x)}.",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
 check_bool <- function(x, arg, call = rlang::caller_env()) {
   if (!rlang::is_bool(x)) {
     cli::cli_abort(
@@ -47,6 +60,8 @@ check_bool <- function(x, arg, call = rlang::caller_env()) {
 describe <- function(x) {
   if (is.numeric(x) && length(x) == 1) {
     format(x)
+  } else if (rlang::is_string(x)) {
+    encodeString(x, quote = '"')
   } else {
     cli::format_inline("{.obj_type_friendly {x}}")
   }

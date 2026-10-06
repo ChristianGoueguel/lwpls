@@ -26,6 +26,9 @@
 #' @param neighbors The number of nearest training samples used for each
 #'   local model. The default (`NULL`) uses all training samples, as in the
 #'   original LW-PLS algorithm.
+#' @param similarity The similarity index: `"euclidean"` (engine default) or
+#'   `"covariance"` for covariance-based LW-PLS (CbLW-PLS). See Details and
+#'   [similarity()].
 #' @param engine A single character string specifying the computational
 #'   engine. Only `"lwpls"` is available.
 #'
@@ -41,6 +44,18 @@
 #' parameter (\eqn{\lambda} in Kaneko's implementation). A weighted PLS model
 #' is then fitted with weighted centering, weighted covariances and the
 #' query is projected onto its local latent space to obtain the prediction.
+#'
+#' With `similarity = "covariance"`, the distances are computed after
+#' projecting the samples on the covariance direction
+#' \eqn{\Gamma = X^\top Y / \lVert X^\top Y \rVert} of the training data,
+#' \eqn{d_i = \lVert \Gamma^\top (x_i - x_q) \rVert}. This covariance-based
+#' LW-PLS (CbLW-PLS; Hazama and Kano, 2015) accounts for the relationships
+#' among the predictors and between the predictors and the outcome(s). For a
+#' single outcome, \eqn{\Gamma} is the first PLS weight vector; for several
+#' outcomes (or classes), the distance combines the covariance directions of
+#' all of them. Hazama and Kano write the weights as
+#' \eqn{\exp(-\phi d_i / \sigma_d)}, so their \eqn{\phi} is
+#' `1 / localization`.
 #'
 #' When `neighbors` is set, only the `neighbors` closest training samples
 #' receive a non-zero weight and \eqn{\sigma_d} is computed over their
@@ -73,6 +88,7 @@
 #' * `num_comp`: [dials::num_comp()]
 #' * `localization`: [localization()]
 #' * `neighbors`: [dials::neighbors()] (default range 10--200)
+#' * `similarity`: [similarity()]
 #'
 #' @references
 #' Kim, S., Kano, M., Nakagawa, H. and Hasebe, S. (2011). Estimation of active
@@ -84,6 +100,11 @@
 #' weighted-partial least squares-discriminant analysis (LW-PLS-DA).
 #' *Analytica Chimica Acta*, 838, 20--30. \doi{10.1016/j.aca.2014.05.057}
 #'
+#' Hazama, K. and Kano, M. (2015). Covariance-based locally weighted partial
+#' least squares for high-performance adaptive modeling. *Chemometrics and
+#' Intelligent Laboratory Systems*, 146, 55--62.
+#' \doi{10.1016/j.chemolab.2015.05.007}
+#'
 #' Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
 #' weighted PLS strategies for regression and discrimination on agronomic NIR
 #' data. *Journal of Chemometrics*, 34(5), e3209. \doi{10.1002/cem.3209}
@@ -91,7 +112,7 @@
 #' @return A model specification object with classes `lwpls` and
 #'   `model_spec`.
 #' @seealso [lwpls_fit()] for the underlying fitting function,
-#'   [multi_predict._lwpls_fit()], [localization()].
+#'   [multi_predict._lwpls_fit()], [localization()], [similarity()].
 #' @examples
 #' lwpls(num_comp = 3, localization = 0.5) |>
 #'   parsnip::set_mode("regression") |>
@@ -115,11 +136,13 @@ lwpls <- function(mode = "unknown",
                   num_comp = NULL,
                   localization = NULL,
                   neighbors = NULL,
+                  similarity = NULL,
                   engine = "lwpls") {
   args <- list(
     num_comp = rlang::enquo(num_comp),
     localization = rlang::enquo(localization),
-    neighbors = rlang::enquo(neighbors)
+    neighbors = rlang::enquo(neighbors),
+    similarity = rlang::enquo(similarity)
   )
 
   parsnip::new_model_spec(
@@ -163,12 +186,14 @@ update.lwpls <- function(object,
                          num_comp = NULL,
                          localization = NULL,
                          neighbors = NULL,
+                         similarity = NULL,
                          fresh = FALSE,
                          ...) {
   args <- list(
     num_comp = rlang::enquo(num_comp),
     localization = rlang::enquo(localization),
-    neighbors = rlang::enquo(neighbors)
+    neighbors = rlang::enquo(neighbors),
+    similarity = rlang::enquo(similarity)
   )
 
   parsnip::update_spec(
@@ -187,6 +212,7 @@ check_args.lwpls <- function(object, call = rlang::caller_env()) {
   check_whole(args$num_comp, "num_comp", min = 1, allow_null = TRUE, call = call)
   check_positive(args$localization, "localization", allow_null = TRUE, call = call)
   check_whole(args$neighbors, "neighbors", min = 1, allow_null = TRUE, call = call)
+  check_similarity(args$similarity, allow_null = TRUE, call = call)
   invisible(object)
 }
 

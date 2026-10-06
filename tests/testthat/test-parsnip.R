@@ -74,6 +74,27 @@ test_that("regression fit and predictions", {
   expect_equal(dim(raw), c(nrow(test), 1, 3))
 })
 
+test_that("the similarity index is passed on", {
+  spec <- lwpls(num_comp = 2, similarity = "covariance") |>
+    parsnip::set_mode("regression")
+  expect_snapshot(parsnip::translate(spec))
+  fit <- parsnip::fit_xy(spec, x = train[x_names], y = train$y)
+  expect_equal(fit$fit$similarity, "covariance")
+  direct <- lwpls_fit(train[x_names], train$y, num_comp = 2, similarity = "covariance")
+  expect_equal(predict(fit, test[x_names]), predict(direct, test[x_names]))
+
+  expect_equal(
+    rlang::eval_tidy(update(spec, similarity = "euclidean")$args$similarity),
+    "euclidean"
+  )
+  expect_snapshot(
+    error = TRUE,
+    lwpls(similarity = "cosine") |>
+      parsnip::set_mode("regression") |>
+      parsnip::fit(y ~ ., data = train)
+  )
+})
+
 test_that("engine arguments are passed on", {
   spec <- lwpls(num_comp = 2) |>
     parsnip::set_mode("regression") |>

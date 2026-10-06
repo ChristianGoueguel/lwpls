@@ -3,9 +3,12 @@
 // For every query sample x_q, each training sample i receives the similarity
 // weight (Kim et al. 2011; Kaneko)
 //
-//     w_i = exp(-d_i / (sd(d) * localization)),   d_i = ||x_i - x_q||,
+//     w_i = exp(-d_i / (sd(d) * localization)),   d_i = ||z_i - z_q||,
 //
-// and a weighted PLS model is fitted around the query. The weighted PLS uses
+// where z are the coordinates used to measure similarity: the predictors
+// themselves (Euclidean distance) or their projection on the covariance
+// direction X'Y (CbLW-PLS, Hazama & Kano 2015). A weighted PLS model is then
+// fitted around the query. The weighted PLS uses
 // the kernel formulation of Dayal & MacGregor (1997): only the p x q
 // cross-product matrix X'WY is deflated and the scores are computed through
 // the R = W(P'W)^-1 weights, so the n x p training matrix is never copied or
@@ -29,6 +32,10 @@ namespace {
 // but would otherwise let numerical noise dominate when the model is very
 // local.
 const double weight_floor = std::numeric_limits<double>::epsilon();
+
+// A local covariance ||X_c' W Y_c|| below this fraction of its Cauchy-Schwarz
+// bound sqrt(SS_x SS_y) is rounding noise: no component is extracted.
+const double cov_floor = std::sqrt(std::numeric_limits<double>::epsilon());
 
 // Similarity weights of the training samples for one query. `w` (length n) is
 // overwritten; samples outside the `k` nearest neighbours get a zero weight.
@@ -86,13 +93,17 @@ arma::uword similarity_weights(const double* dist, const arma::uword n,
 
 // Predictions of LW-PLS models with 1, ..., num_comp components.
 //
-// x, y   : training predictors (n x p) and outcomes (n x q), already centred
-//          (and possibly scaled).
-// new_x  : query predictors (m x p), transformed like x.
+// x, y     : training predictors (n x p) and outcomes (n x q), already
+//            centred (and possibly scaled).
+// new_x    : query predictors (m x p), transformed like x.
+// dist_x   : coordinates of the training samples used for the distances
+//            (n x r); x itself for Euclidean similarity.
+// dist_new : the same coordinates for the queries (m x r).
 // Returns an m x q x num_comp array of predictions on the scale of y.
 // [[Rcpp::export(rng = false)]]
 arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
-                             const arma::mat& new_x, const int num_comp,
+                             const arma::mat& new_x, const arma::mat& dist_x,
+                             const arma::mat& dist_new, const int num_comp,
                              const double localization, const int neighbors,
                              const double tol) {
   const arma::uword n = x.n_rows;
@@ -107,7 +118,8 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
   if (m == 0 || n == 0) return out;
 
   // Block size: keep the per-block working memory around 128 MB.
-  const double per_query = 3.0 * n + 2.0 * p * n_comp + 1.0 * p * q + 4.0 * p;
+  const double per_query = 3.0 * n + 2.0 * p * n_comp + 1.0 * p * q + 4.0 * p +
+                           1.0 * dist_x.n_cols;
   const arma::uword block = static_cast<arma::uword>(
       std::max(1.0, std::min(256.0, 16777216.0 / per_query)));
 
@@ -116,6 +128,7 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
   const arma::mat xt = x.t();  // p x n
   const arma::mat yt = y.t();  // q x n
   const arma::vec x_sq = arma::sum(arma::square(x), 1);
+  const arma::vec dist_sq = arma::sum(arma::square(dist_x), 1);
   std::vector<arma::uword> idx(n);
   arma::vec dist(n);
 
@@ -126,13 +139,14 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
     const arma::mat query = new_x.rows(start, end - 1).t();  // p x b
 
     // Distances and similarity weights -------------------------------------
-    arma::mat w = x * query;  // n x b; cross-products, then overwritten
-    const arma::rowvec query_sq = arma::sum(arma::square(query), 0);
+    const arma::mat dist_query = dist_new.rows(start, end - 1).t();  // r x b
+    arma::mat w = dist_x * dist_query;  // n x b; cross-products, overwritten
+    const arma::rowvec query_sq = arma::sum(arma::square(dist_query), 0);
     std::vector<arma::uword> max_comp(b);
     for (arma::uword j = 0; j < b; ++j) {
       double* col = w.colptr(j);
       for (arma::uword i = 0; i < n; ++i) {
-        const double d2 = x_sq[i] + query_sq[j] - 2.0 * col[i];
+        const double d2 = dist_sq[i] + query_sq[j] - 2.0 * col[i];
         dist[i] = d2 > 0.0 ? std::sqrt(d2) : 0.0;
       }
       const arma::uword n_nonzero =
@@ -154,9 +168,11 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
     // X_c' W Y_c = X' W Y_c - x_mean (1' W Y_c).
     arma::cube xy(p, q, b);
     arma::mat z(n, b);
+    arma::rowvec ss_y(b, arma::fill::zeros);
     for (arma::uword c = 0; c < q; ++c) {
       for (arma::uword j = 0; j < b; ++j) {
         z.col(j) = w.col(j) % (y.col(c) - y_mean(c, j));
+        ss_y[j] += arma::dot(z.col(j), y.col(c) - y_mean(c, j));
       }
       const arma::mat xz = xt * z;
       const arma::rowvec z_sum = arma::sum(z, 0);
@@ -178,8 +194,8 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
     std::vector<char> active(b);
     for (arma::uword j = 0; j < b; ++j) {
       xy_norm0[j] = arma::norm(xy.slice(j), "fro");
-      active[j] = max_comp[j] > 0 && xy_norm0[j] > 0.0 &&
-                  std::isfinite(xy_norm0[j]);
+      active[j] = max_comp[j] > 0 && std::isfinite(xy_norm0[j]) &&
+                  xy_norm0[j] > cov_floor * std::sqrt(ss_x[j] * ss_y[j]);
     }
 
     arma::mat r_cur(p, b);

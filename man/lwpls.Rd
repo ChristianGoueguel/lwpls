@@ -9,6 +9,7 @@ lwpls(
   num_comp = NULL,
   localization = NULL,
   neighbors = NULL,
+  similarity = NULL,
   engine = "lwpls"
 )
 }
@@ -27,6 +28,10 @@ that LW-PLS tends to a global PLS model. See Details.}
 \item{neighbors}{The number of nearest training samples used for each
 local model. The default (\code{NULL}) uses all training samples, as in the
 original LW-PLS algorithm.}
+
+\item{similarity}{The similarity index: \code{"euclidean"} (engine default) or
+\code{"covariance"} for covariance-based LW-PLS (CbLW-PLS). See Details and
+\code{\link[=similarity]{similarity()}}.}
 
 \item{engine}{A single character string specifying the computational
 engine. Only \code{"lwpls"} is available.}
@@ -63,6 +68,18 @@ parameter (\eqn{\lambda} in Kaneko's implementation). A weighted PLS model
 is then fitted with weighted centering, weighted covariances and the
 query is projected onto its local latent space to obtain the prediction.
 
+With \code{similarity = "covariance"}, the distances are computed after
+projecting the samples on the covariance direction
+\eqn{\Gamma = X^\top Y / \lVert X^\top Y \rVert} of the training data,
+\eqn{d_i = \lVert \Gamma^\top (x_i - x_q) \rVert}. This covariance-based
+LW-PLS (CbLW-PLS; Hazama and Kano, 2015) accounts for the relationships
+among the predictors and between the predictors and the outcome(s). For a
+single outcome, \eqn{\Gamma} is the first PLS weight vector; for several
+outcomes (or classes), the distance combines the covariance directions of
+all of them. Hazama and Kano write the weights as
+\eqn{\exp(-\phi d_i / \sigma_d)}, so their \eqn{\phi} is
+\code{1 / localization}.
+
 When \code{neighbors} is set, only the \code{neighbors} closest training samples
 receive a non-zero weight and \eqn{\sigma_d} is computed over their
 distances. This is the "KNN-LW" strategy, which Lesnoff et al. (2020)
@@ -93,6 +110,7 @@ Tuning parameters:
 \item \code{num_comp}: \code{\link[dials:num_comp]{dials::num_comp()}}
 \item \code{localization}: \code{\link[=localization]{localization()}}
 \item \code{neighbors}: \code{\link[dials:neighbors]{dials::neighbors()}} (default range 10--200)
+\item \code{similarity}: \code{\link[=similarity]{similarity()}}
 }
 }
 
@@ -125,11 +143,16 @@ Bevilacqua, M. and Marini, F. (2014). Local classification: Locally
 weighted-partial least squares-discriminant analysis (LW-PLS-DA).
 \emph{Analytica Chimica Acta}, 838, 20--30. \doi{10.1016/j.aca.2014.05.057}
 
+Hazama, K. and Kano, M. (2015). Covariance-based locally weighted partial
+least squares for high-performance adaptive modeling. \emph{Chemometrics and
+Intelligent Laboratory Systems}, 146, 55--62.
+\doi{10.1016/j.chemolab.2015.05.007}
+
 Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
 weighted PLS strategies for regression and discrimination on agronomic NIR
 data. \emph{Journal of Chemometrics}, 34(5), e3209. \doi{10.1002/cem.3209}
 }
 \seealso{
 \code{\link[=lwpls_fit]{lwpls_fit()}} for the underlying fitting function,
-\code{\link[=multi_predict._lwpls_fit]{multi_predict._lwpls_fit()}}, \code{\link[=localization]{localization()}}.
+\code{\link[=multi_predict._lwpls_fit]{multi_predict._lwpls_fit()}}, \code{\link[=localization]{localization()}}, \code{\link[=similarity]{similarity()}}.
 }

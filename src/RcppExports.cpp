@@ -12,24 +12,26 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // lwpls_predict_cpp
-arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y, const arma::mat& new_x, const int num_comp, const double localization, const int neighbors, const double tol);
-RcppExport SEXP _lwpls_lwpls_predict_cpp(SEXP xSEXP, SEXP ySEXP, SEXP new_xSEXP, SEXP num_compSEXP, SEXP localizationSEXP, SEXP neighborsSEXP, SEXP tolSEXP) {
+arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y, const arma::mat& new_x, const arma::mat& dist_x, const arma::mat& dist_new, const int num_comp, const double localization, const int neighbors, const double tol);
+RcppExport SEXP _lwpls_lwpls_predict_cpp(SEXP xSEXP, SEXP ySEXP, SEXP new_xSEXP, SEXP dist_xSEXP, SEXP dist_newSEXP, SEXP num_compSEXP, SEXP localizationSEXP, SEXP neighborsSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type new_x(new_xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type dist_x(dist_xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type dist_new(dist_newSEXP);
     Rcpp::traits::input_parameter< const int >::type num_comp(num_compSEXP);
     Rcpp::traits::input_parameter< const double >::type localization(localizationSEXP);
     Rcpp::traits::input_parameter< const int >::type neighbors(neighborsSEXP);
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(lwpls_predict_cpp(x, y, new_x, num_comp, localization, neighbors, tol));
+    rcpp_result_gen = Rcpp::wrap(lwpls_predict_cpp(x, y, new_x, dist_x, dist_new, num_comp, localization, neighbors, tol));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lwpls_lwpls_predict_cpp", (DL_FUNC) &_lwpls_lwpls_predict_cpp, 7},
+    {"_lwpls_lwpls_predict_cpp", (DL_FUNC) &_lwpls_lwpls_predict_cpp, 9},
     {NULL, NULL, 0}
 };
 

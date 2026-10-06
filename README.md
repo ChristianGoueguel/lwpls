@@ -27,6 +27,9 @@ relationships.
 - `lwpls()`: a [parsnip](https://parsnip.tidymodels.org) model for
   **regression** (one or more outcomes) and **classification**
   (LW-PLS-DA).
+- Two similarity indexes: the Euclidean distance of the original LW-PLS,
+  and the covariance-based index of CbLW-PLS
+  (`similarity = "covariance"`).
 - A native implementation, validated against [Kaneko’s reference
   implementation](https://github.com/hkaneko1985/lwpls), with the
   prediction kernel written in C++
@@ -34,9 +37,9 @@ relationships.
   Queries are processed in blocks, so most of the work runs as BLAS
   matrix-matrix products.
 - Tuning with [tune](https://tune.tidymodels.org) and
-  [dials](https://dials.tidymodels.org): `localization()` is a tuning
-  parameter, and all values of `num_comp` are evaluated from a single
-  fit (the “submodel trick”).
+  [dials](https://dials.tidymodels.org): `localization()` and
+  `similarity()` are tuning parameters, and all values of `num_comp` are
+  evaluated from a single fit (the “submodel trick”).
 - `lwpls_fit()`: a standalone [hardhat](https://hardhat.tidymodels.org)
   modeling function with matrix, data frame, formula and recipe
   interfaces.
@@ -128,6 +131,10 @@ give global PLS.
   weighted-partial least squares-discriminant analysis (LW-PLS-DA).
   *Analytica Chimica Acta*, 838, 20–30.
   [doi:10.1016/j.aca.2014.05.057](https://doi.org/10.1016/j.aca.2014.05.057)
+- Hazama, K. and Kano, M. (2015). Covariance-based locally weighted
+  partial least squares for high-performance adaptive modeling.
+  *Chemometrics and Intelligent Laboratory Systems*, 146, 55–62.
+  [doi:10.1016/j.chemolab.2015.05.007](https://doi.org/10.1016/j.chemolab.2015.05.007)
 - Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
   weighted PLS strategies for regression and discrimination on agronomic
   NIR data. *Journal of Chemometrics*, 34(5), e3209.

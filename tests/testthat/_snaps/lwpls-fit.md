@@ -18,6 +18,7 @@
       Predictors:       6 (standardized) 
       Components:       2 
       Localization:     1 
+      Similarity:       Euclidean 
       Neighbors:        50 
 
 ---
@@ -32,6 +33,7 @@
       Classes:          setosa, versicolor, virginica 
       Components:       2 
       Localization:     1 
+      Similarity:       Euclidean 
       Neighbors:        all (150) 
 
 ---
@@ -46,6 +48,22 @@
       Outcomes:         y, y2 
       Components:       2 
       Localization:     1 
+      Similarity:       Euclidean 
+      Neighbors:        all (90) 
+
+---
+
+    Code
+      lwpls_fit(y ~ ., data = train, similarity = "covariance")
+    Output
+      Locally-weighted PLS (regression)
+      
+      Training samples: 90 
+      Predictors:       7 (standardized) 
+      Outcomes:         y 
+      Components:       2 
+      Localization:     1 
+      Similarity:       covariance-based (CbLW-PLS) 
       Neighbors:        all (90) 
 
 # bad hyperparameters are rejected
@@ -63,6 +81,14 @@
     Condition
       Error in `lwpls_fit()`:
       ! `num_comp` must be a single whole number >= 1, not 1.5.
+
+---
+
+    Code
+      lwpls_fit(x, y, num_comp = 1:2)
+    Condition
+      Error in `lwpls_fit()`:
+      ! `num_comp` must be a single whole number >= 1, not an integer vector.
 
 ---
 
@@ -86,7 +112,7 @@
       lwpls_fit(x, y, localization = "small")
     Condition
       Error in `lwpls_fit()`:
-      ! `localization` must be a single positive number, not a string.
+      ! `localization` must be a single positive number, not "small".
 
 ---
 
@@ -95,6 +121,14 @@
     Condition
       Error in `lwpls_fit()`:
       ! `neighbors` must be a single whole number >= 1, not 0.
+
+---
+
+    Code
+      lwpls_fit(x, y, similarity = "mahalanobis")
+    Condition
+      Error in `lwpls_fit()`:
+      ! `similarity` must be one of "euclidean" or "covariance", not "mahalanobis".
 
 ---
 

@@ -34,6 +34,12 @@ longer depends on the archived rnirs package.
 
 * New dials tuning parameter `localization()`.
 
+* Covariance-based LW-PLS (CbLW-PLS, Hazama and Kano, 2015): the new
+  `similarity` argument measures the similarity between samples with the
+  Euclidean distance (`"euclidean"`, the default) or along the covariance
+  direction of the training data (`"covariance"`). It can be tuned with the
+  new dials parameter `similarity()`.
+
 * The optional `neighbors` argument restricts each local model to the nearest
   training samples.
 

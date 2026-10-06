@@ -30,6 +30,9 @@
 #'   models.
 #' @param neighbors Either `NULL` (default), to use all training samples, or
 #'   the number of nearest training samples used to build each local model.
+#' @param similarity The similarity index used to weight the training
+#'   samples: `"euclidean"` (default) or `"covariance"` (covariance-based
+#'   LW-PLS, CbLW-PLS). See [lwpls()] for details.
 #' @param scale A logical: should the predictors (and numeric outcomes) be
 #'   standardized to unit variance? Predictors are always mean-centered,
 #'   which does not affect the predictions.
@@ -73,12 +76,13 @@ lwpls_fit.data.frame <- function(x,
                                  num_comp = 2L,
                                  localization = 1,
                                  neighbors = NULL,
+                                 similarity = "euclidean",
                                  scale = TRUE,
                                  ...) {
   rlang::check_dots_empty()
   check_character_outcome(y)
   processed <- hardhat::mold(x, y)
-  lwpls_bridge(processed, num_comp, localization, neighbors, scale)
+  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
 }
 
 #' @export
@@ -88,12 +92,13 @@ lwpls_fit.matrix <- function(x,
                              num_comp = 2L,
                              localization = 1,
                              neighbors = NULL,
+                             similarity = "euclidean",
                              scale = TRUE,
                              ...) {
   rlang::check_dots_empty()
   check_character_outcome(y)
   processed <- hardhat::mold(x, y)
-  lwpls_bridge(processed, num_comp, localization, neighbors, scale)
+  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
 }
 
 #' @export
@@ -103,6 +108,7 @@ lwpls_fit.formula <- function(formula,
                               num_comp = 2L,
                               localization = 1,
                               neighbors = NULL,
+                              similarity = "euclidean",
                               scale = TRUE,
                               ...) {
   rlang::check_dots_empty()
@@ -116,7 +122,7 @@ lwpls_fit.formula <- function(formula,
       indicators = "traditional"
     )
   )
-  lwpls_bridge(processed, num_comp, localization, neighbors, scale)
+  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
 }
 
 #' @export
@@ -126,11 +132,12 @@ lwpls_fit.recipe <- function(x,
                              num_comp = 2L,
                              localization = 1,
                              neighbors = NULL,
+                             similarity = "euclidean",
                              scale = TRUE,
                              ...) {
   rlang::check_dots_empty()
   processed <- hardhat::mold(x, data)
-  lwpls_bridge(processed, num_comp, localization, neighbors, scale)
+  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
 }
 
 # ------------------------------------------------------------------------------
@@ -140,11 +147,13 @@ lwpls_bridge <- function(processed,
                          num_comp,
                          localization,
                          neighbors,
+                         similarity,
                          scale,
                          call = rlang::caller_env()) {
   check_whole(num_comp, "num_comp", min = 1, call = call)
   check_positive(localization, "localization", call = call)
   check_whole(neighbors, "neighbors", min = 1, allow_null = TRUE, call = call)
+  check_similarity(similarity, call = call)
   check_bool(scale, "scale", call = call)
 
   predictors <- processed$predictors
@@ -231,6 +240,7 @@ lwpls_bridge <- function(processed,
     num_comp = num_comp,
     localization = localization,
     neighbors = neighbors,
+    similarity = similarity,
     scale = scale,
     blueprint = processed$blueprint
   )
@@ -247,6 +257,7 @@ lwpls_fit_impl <- function(x,
                            num_comp,
                            localization,
                            neighbors,
+                           similarity,
                            scale,
                            blueprint) {
   n <- nrow(x)
@@ -281,9 +292,16 @@ lwpls_fit_impl <- function(x,
   y_center <- colMeans(y)
   y_scale <- if (scale && mode == "regression") column_sd(y) else rep(1, ncol(y))
 
+  x <- standardize(x, x_center, x_scale)
+  y <- standardize(y, y_center, y_scale)
+
+  # CbLW-PLS measures distances after projecting the samples on the
+  # covariance direction(s) X'Y (Hazama & Kano, 2015).
+  projection <- if (similarity == "covariance") covariance_projection(x, y)
+
   hardhat::new_model(
-    x = standardize(x, x_center, x_scale),
-    y = standardize(y, y_center, y_scale),
+    x = x,
+    y = y,
     x_center = x_center,
     x_scale = x_scale,
     y_center = y_center,
@@ -295,6 +313,8 @@ lwpls_fit_impl <- function(x,
     max_comp = as.integer(max_comp),
     localization = as.numeric(localization),
     neighbors = as.integer(neighbors),
+    similarity = similarity,
+    projection = projection,
     scale = scale,
     blueprint = blueprint,
     class = "lwpls_fit"
@@ -314,6 +334,11 @@ print.lwpls_fit <- function(x, ...) {
   }
   cat("Components:      ", x$num_comp, "\n")
   cat("Localization:    ", format(x$localization, digits = 4), "\n")
+  cat(
+    "Similarity:      ",
+    if (x$similarity == "covariance") "covariance-based (CbLW-PLS)" else "Euclidean",
+    "\n"
+  )
   cat(
     "Neighbors:       ",
     if (x$neighbors >= n) paste0("all (", n, ")") else x$neighbors,
@@ -337,6 +362,19 @@ check_character_outcome <- function(y, call = rlang::caller_env()) {
     )
   }
   invisible(y)
+}
+
+# Gamma = X'Y / ||X'Y||, the first PLS weight vector for a single outcome.
+# A covariance below sqrt(eps) of its Cauchy-Schwarz bound ||X|| ||Y|| is
+# rounding noise: Gamma is then zero, so all samples are equally similar.
+covariance_projection <- function(x, y) {
+  xy <- crossprod(x, y)
+  norm <- sqrt(sum(xy^2))
+  if (norm > sqrt(.Machine$double.eps) * sqrt(sum(x^2) * sum(y^2))) {
+    xy / norm
+  } else {
+    xy * 0
+  }
 }
 
 class_indicators <- function(y) {

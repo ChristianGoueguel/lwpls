@@ -135,10 +135,20 @@ lwpls_predict_array <- function(object, predictors, num_comp) {
   }
 
   n_comp <- min(num_comp, object$max_comp)
+  new_x <- standardize(x[complete, , drop = FALSE], object$x_center, object$x_scale)
+  if (is.null(object$projection)) {
+    dist_x <- object$x
+    dist_new <- new_x
+  } else {
+    dist_x <- object$x %*% object$projection
+    dist_new <- new_x %*% object$projection
+  }
   pred <- lwpls_predict_cpp(
     x = object$x,
     y = object$y,
-    new_x = standardize(x[complete, , drop = FALSE], object$x_center, object$x_scale),
+    new_x = new_x,
+    dist_x = dist_x,
+    dist_new = dist_new,
     num_comp = n_comp,
     localization = object$localization,
     neighbors = object$neighbors,

@@ -18,3 +18,4 @@ reference:
   - title: Tuning parameters
     contents:
       - localization
+      - similarity

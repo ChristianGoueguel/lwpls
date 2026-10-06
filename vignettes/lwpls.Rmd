@@ -72,7 +72,8 @@ The two main hyperparameters are therefore:
 
 Optionally, `neighbors` restricts each local model to the nearest training
 samples (the "KNN-LW" strategy compared with the original LW-PLS by Lesnoff et
-al., 2020).
+al., 2020), and `similarity` changes how the distances $d_i$ are measured (see
+[Similarity indexes](#similarity-indexes)).
 
 ## Regression: fat-free water content of meat from NIR spectra
 
@@ -191,6 +192,58 @@ ggplot(test_preds, aes(water, .pred)) +
   labs(x = "Observed water (%)", y = "Predicted water (%)") +
   theme_bw()
 ```
+
+### Similarity indexes
+
+By default, the similarity between two samples is based on the Euclidean
+distance between their (standardized) predictors, so every predictor counts
+equally, whether or not it is related to the outcome. Covariance-based LW-PLS
+(CbLW-PLS; Hazama and Kano, 2015) measures the distances along the covariance
+direction $\Gamma = X^\top y / \lVert X^\top y \rVert$ of the training data
+instead,
+
+$$
+d_i = \lVert \Gamma^\top (x_i - x_q) \rVert,
+$$
+
+so that the predictors related to the outcome drive the similarity. Use
+`similarity = "covariance"` to select it. Since the best index depends on the
+data, it can be tuned together with the other parameters with `similarity()`:
+
+```{r}
+#| label: similarity
+similarity_wflow <- workflow(
+  water ~ .,
+  lwpls(num_comp = tune(), localization = tune(), similarity = tune()) |>
+    set_mode("regression")
+)
+
+similarity_grid <- dials::grid_regular(
+  dials::num_comp(c(1, 15)),
+  localization(),
+  similarity(),
+  levels = c(num_comp = 15, localization = 8, similarity = 2)
+)
+
+similarity_res <- tune_grid(
+  similarity_wflow,
+  resamples = meats_folds,
+  grid = similarity_grid,
+  metrics = metric_set(rmse)
+)
+
+# Best configuration of each similarity index
+similarity_perf <- collect_metrics(similarity_res)
+best_by_index <- lapply(
+  split(similarity_perf, similarity_perf$similarity),
+  function(x) x[which.min(x$mean), ]
+)
+do.call(rbind, best_by_index)[, c("similarity", "num_comp", "localization", "mean", "std_err")]
+```
+
+On these spectra, the two indexes perform similarly. Hazama and Kano found
+CbLW-PLS to give the best predictions in two industrial applications, so it is
+worth including in the tuning grid.
 
 ## Classification
 
@@ -396,6 +449,9 @@ lwpls(num_comp = 10, localization = 0.5) |>
 * Bevilacqua, M. and Marini, F. (2014). Local classification: Locally
   weighted-partial least squares-discriminant analysis (LW-PLS-DA).
   *Analytica Chimica Acta*, 838, 20--30.
+* Hazama, K. and Kano, M. (2015). Covariance-based locally weighted partial
+  least squares for high-performance adaptive modeling. *Chemometrics and
+  Intelligent Laboratory Systems*, 146, 55--62.
 * Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
   weighted PLS strategies for regression and discrimination on agronomic NIR
   data. *Journal of Chemometrics*, 34(5), e3209.

@@ -19,6 +19,7 @@ lwpls_fit(x, ...)
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -29,6 +30,7 @@ lwpls_fit(x, ...)
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -39,6 +41,7 @@ lwpls_fit(x, ...)
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -49,6 +52,7 @@ lwpls_fit(x, ...)
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -80,6 +84,10 @@ models.}
 
 \item{neighbors}{Either \code{NULL} (default), to use all training samples, or
 the number of nearest training samples used to build each local model.}
+
+\item{similarity}{The similarity index used to weight the training
+samples: \code{"euclidean"} (default) or \code{"covariance"} (covariance-based
+LW-PLS, CbLW-PLS). See \code{\link[=lwpls]{lwpls()}} for details.}
 
 \item{scale}{A logical: should the predictors (and numeric outcomes) be
 standardized to unit variance? Predictors are always mean-centered,

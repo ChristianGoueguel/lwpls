@@ -67,6 +67,14 @@ make_lwpls <- function() {
     func = list(pkg = "dials", fun = "neighbors", range = c(10L, 200L)),
     has_submodel = FALSE
   )
+  parsnip::set_model_arg(
+    model = "lwpls",
+    eng = "lwpls",
+    parsnip = "similarity",
+    original = "similarity",
+    func = list(pkg = "lwpls", fun = "similarity"),
+    has_submodel = FALSE
+  )
 
   parsnip::set_pred(
     model = "lwpls",

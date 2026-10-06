@@ -24,6 +24,52 @@ test_that("predictions match the reference without scaling", {
   expect_equal(unname(raw[, 1, ]), ref, tolerance = 1e-10)
 })
 
+test_that("covariance-based similarity matches the CbLW-PLS reference", {
+  for (lambda in c(0.25, 1, 4)) {
+    fit <- lwpls_fit(
+      train[x_names], train$y,
+      num_comp = 4, localization = lambda, similarity = "covariance"
+    )
+    raw <- predict(fit, test[x_names], type = "raw")
+    ref <- kaneko_predict(
+      as.matrix(train[x_names]), train$y, as.matrix(test[x_names]), 4, lambda,
+      covariance = TRUE
+    )
+    expect_equal(unname(raw[, 1, ]), ref, tolerance = 1e-10)
+  }
+
+  euclidean <- lwpls_fit(train[x_names], train$y, num_comp = 4)
+  expect_null(euclidean$projection)
+  expect_false(isTRUE(all.equal(
+    predict(fit, test[x_names]),
+    predict(euclidean, test[x_names])
+  )))
+})
+
+test_that("covariance-based similarity with several outcomes and classes", {
+  y <- as.matrix(train[c("y", "y2")])
+  fit <- lwpls_fit(train[x_names], y, num_comp = 3, similarity = "covariance")
+  xy <- crossprod(fit$x, fit$y)
+  expect_equal(fit$projection, xy / sqrt(sum(xy^2)))
+  expect_equal(dim(fit$projection), c(6, 2))
+  pred <- predict(fit, test[x_names])
+  expect_named(pred, c(".pred_y", ".pred_y2"))
+  expect_true(all(is.finite(as.matrix(pred))))
+
+  fit_cls <- lwpls_fit(Species ~ ., data = iris, num_comp = 2, similarity = "covariance")
+  prob <- predict(fit_cls, iris[seq(1, 150, by = 10), ], type = "prob")
+  expect_equal(rowSums(prob), rep(1, nrow(prob)))
+  expect_gt(mean(predict(fit_cls, iris)$.pred_class == iris$Species), 0.9)
+})
+
+test_that("covariance-based similarity without covariance gives global PLS weights", {
+  x <- data.frame(a = c(1, -1, 1, -1), b = c(1, 1, -1, -1))
+  y <- c(1, 2, 2, 1)
+  fit <- lwpls_fit(x, y, num_comp = 1, similarity = "covariance")
+  expect_equal(unname(fit$projection), matrix(0, 2, 1))
+  expect_equal(predict(fit, x)$.pred, rep(mean(y), 4))
+})
+
 test_that("`neighbors` restricts each local model to the nearest samples", {
   k <- 30
   fit <- lwpls_fit(train[x_names], train$y, num_comp = 3, localization = 1, neighbors = k)
@@ -221,6 +267,7 @@ test_that("print method", {
   expect_snapshot(lwpls_fit(train[x_names], train$y, num_comp = 2, neighbors = 50))
   expect_snapshot(lwpls_fit(Species ~ ., data = iris, scale = FALSE))
   expect_snapshot(lwpls_fit(y + y2 ~ ., data = train, num_comp = 2))
+  expect_snapshot(lwpls_fit(y ~ ., data = train, similarity = "covariance"))
 })
 
 # Input validation ------------------------------------------------------------
@@ -230,10 +277,12 @@ test_that("bad hyperparameters are rejected", {
   y <- train$y
   expect_snapshot(error = TRUE, lwpls_fit(x, y, num_comp = 0))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, num_comp = 1.5))
+  expect_snapshot(error = TRUE, lwpls_fit(x, y, num_comp = 1:2))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, localization = -1))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, localization = Inf))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, localization = "small"))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, neighbors = 0))
+  expect_snapshot(error = TRUE, lwpls_fit(x, y, similarity = "mahalanobis"))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, scale = "yes"))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, num_comps = 2))
   expect_snapshot(fit <- lwpls_fit(x, y, neighbors = 500))

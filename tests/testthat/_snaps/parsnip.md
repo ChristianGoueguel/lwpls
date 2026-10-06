@@ -85,6 +85,32 @@
       Error in `parsnip::fit()`:
       ! `num_comp` must be a single whole number >= 1, not 0.
 
+# the similarity index is passed on
+
+    Code
+      parsnip::translate(spec)
+    Output
+      Locally-Weighted PLS Model Specification (regression)
+      
+      Main Arguments:
+        num_comp = 2
+        similarity = covariance
+      
+      Computational engine: lwpls 
+      
+      Model fit template:
+      lwpls::lwpls_fit(x = missing_arg(), y = missing_arg(), num_comp = 2, 
+          similarity = "covariance")
+
+---
+
+    Code
+      parsnip::fit(parsnip::set_mode(lwpls(similarity = "cosine"), "regression"), y ~
+        ., data = train)
+    Condition
+      Error in `parsnip::fit()`:
+      ! `similarity` must be one of "euclidean" or "covariance", not "cosine".
+
 # multi_predict() for regression
 
     Code

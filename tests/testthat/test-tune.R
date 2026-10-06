@@ -6,18 +6,32 @@ test_that("localization parameter", {
   expect_snapshot(localization())
 })
 
+test_that("similarity parameter", {
+  param <- similarity()
+  expect_s3_class(param, "qual_param")
+  expect_equal(param$values, c("euclidean", "covariance"))
+  expect_equal(similarity("covariance")$values, "covariance")
+  expect_snapshot(similarity())
+})
+
 test_that("tunable parameters", {
   skip_if_not_installed("tune")
-  spec <- lwpls(num_comp = tune::tune(), localization = tune::tune(), neighbors = tune::tune()) |>
+  spec <- lwpls(
+    num_comp = tune::tune(),
+    localization = tune::tune(),
+    neighbors = tune::tune(),
+    similarity = tune::tune()
+  ) |>
     parsnip::set_mode("regression")
 
   tunable <- generics::tunable(spec)
-  expect_equal(tunable$name, c("num_comp", "localization", "neighbors"))
+  expect_equal(tunable$name, c("num_comp", "localization", "neighbors", "similarity"))
 
   params <- hardhat::extract_parameter_set_dials(spec)
-  expect_equal(params$id, c("num_comp", "localization", "neighbors"))
+  expect_equal(params$id, c("num_comp", "localization", "neighbors", "similarity"))
   expect_equal(params$object[[2]]$range, localization()$range)
   expect_equal(params$object[[3]]$range, list(lower = 10L, upper = 200L))
+  expect_equal(params$object[[4]]$values, values_similarity)
 })
 
 test_that("min_grid() uses the submodel trick for num_comp", {
@@ -61,6 +75,31 @@ test_that("tune_grid() works and matches direct resampling", {
     perf$mean[perf$num_comp == 2 & perf$localization == 0.5],
     tune::collect_metrics(direct)$mean
   )
+})
+
+test_that("tune_grid() can compare similarity indexes", {
+  skip_on_cran()
+  skip_if_not_installed("tune")
+  skip_if_not_installed("workflows")
+  skip_if_not_installed("rsample")
+  skip_if_not_installed("yardstick")
+
+  dat <- sim_reg(n = 90)[c(paste0("x", 1:6), "y")]
+  folds <- withr::with_seed(1, rsample::vfold_cv(dat, v = 3))
+  spec <- lwpls(num_comp = tune::tune(), similarity = tune::tune()) |>
+    parsnip::set_mode("regression")
+  grid <- expand.grid(num_comp = 1:3, similarity = values_similarity, stringsAsFactors = FALSE)
+
+  res <- tune::tune_grid(
+    workflows::workflow(y ~ ., spec),
+    folds,
+    grid = grid,
+    metrics = yardstick::metric_set(yardstick::rmse)
+  )
+  perf <- tune::collect_metrics(res)
+  expect_equal(nrow(perf), 6)
+  expect_setequal(perf$similarity, values_similarity)
+  expect_true(all(is.finite(perf$mean)))
 })
 
 test_that("tune_grid() works for classification", {

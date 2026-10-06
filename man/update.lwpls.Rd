@@ -10,6 +10,7 @@
   num_comp = NULL,
   localization = NULL,
   neighbors = NULL,
+  similarity = NULL,
   fresh = FALSE,
   ...
 )
@@ -34,6 +35,10 @@ that LW-PLS tends to a global PLS model. See Details.}
 \item{neighbors}{The number of nearest training samples used for each
 local model. The default (\code{NULL}) uses all training samples, as in the
 original LW-PLS algorithm.}
+
+\item{similarity}{The similarity index: \code{"euclidean"} (engine default) or
+\code{"covariance"} for covariance-based LW-PLS (CbLW-PLS). See Details and
+\code{\link[=similarity]{similarity()}}.}
 
 \item{fresh}{A logical for whether the arguments should be modified
 in-place or replaced wholesale.}
