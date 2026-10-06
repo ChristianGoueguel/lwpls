@@ -124,9 +124,6 @@ least squares and statistical wavelength selection. *International
 Journal of Pharmaceutics*, 421(2), 269–274.
 [doi:10.1016/j.ijpharm.2011.10.007](https://doi.org/10.1016/j.ijpharm.2011.10.007)
 
-Kaneko, H. Locally-weighted partial least squares (LWPLS).
-<https://datachemeng.com/locallyweightedpartialleastsquares/>
-
 ## See also
 
 [`lwpls_fit()`](https://christiangoueguel.com/lwpls/reference/lwpls_fit.md)

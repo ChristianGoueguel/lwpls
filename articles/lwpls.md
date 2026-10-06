@@ -208,33 +208,174 @@ For a factor outcome, LW-PLS models the class indicators (LW-PLS-DA).
 The predicted class is the one with the largest predicted indicator, and
 the indicators, truncated to $`[0, 1]`$, give the class probabilities.
 
+Because every local model is linear but fitted around its own query,
+LW-PLS-DA can follow curved class boundaries that a global PLS-DA model
+cannot. The `parabolic` data from modeldata illustrate this: two classes
+separated by a parabola in the plane of the predictors `X1` and `X2`.
+
 ``` r
 
-set.seed(1)
-iris_split <- initial_split(iris, strata = Species)
+data(parabolic, package = "modeldata")
 
-iris_fit <-
-  lwpls(num_comp = 2, localization = 0.5) |>
-  set_mode("classification") |>
-  fit(Species ~ ., data = training(iris_split))
-
-iris_preds <- augment(iris_fit, testing(iris_split))
-head(iris_preds[, 1:5])
-#> # A tibble: 6 × 5
-#>   .pred_class .pred_setosa .pred_versicolor .pred_virginica Sepal.Length
-#>   <fct>              <dbl>            <dbl>           <dbl>        <dbl>
-#> 1 setosa             0.927          0.0729          0                4.9
-#> 2 setosa             1              0               0                5  
-#> 3 setosa             0.985          0.00747         0.00782          5.4
-#> 4 setosa             0.956          0.0440          0                4.8
-#> 5 setosa             0.958          0.0128          0.0289           5.7
-#> 6 setosa             0.986          0.00366         0.00985          5.4
-accuracy(iris_preds, truth = Species, estimate = .pred_class)
-#> # A tibble: 1 × 3
-#>   .metric  .estimator .estimate
-#>   <chr>    <chr>          <dbl>
-#> 1 accuracy multiclass     0.923
+set.seed(91)
+para_split <- initial_split(parabolic, strata = class)
+para_train <- training(para_split)
+para_test <- testing(para_split)
+para_folds <- vfold_cv(para_train, v = 5, strata = class)
 ```
+
+With two predictors, local models have at most two components, so we
+tune `localization` only:
+
+``` r
+
+lwplsda_wflow <- workflow(
+  class ~ .,
+  lwpls(num_comp = 2, localization = tune()) |> set_mode("classification")
+)
+
+lwplsda_res <- tune_grid(
+  lwplsda_wflow,
+  resamples = para_folds,
+  grid = data.frame(localization = 2^seq(-6, 5)),
+  metrics = metric_set(roc_auc, accuracy)
+)
+
+show_best(lwplsda_res, metric = "roc_auc", n = 3)
+#> # A tibble: 3 × 7
+#>   localization .metric .estimator  mean     n std_err .config         
+#>          <dbl> <chr>   <chr>      <dbl> <int>   <dbl> <chr>           
+#> 1       0.25   roc_auc binary     0.962     5 0.00424 pre0_mod05_post0
+#> 2       0.125  roc_auc binary     0.961     5 0.00488 pre0_mod04_post0
+#> 3       0.0625 roc_auc binary     0.959     5 0.00337 pre0_mod03_post0
+```
+
+``` r
+
+autoplot(lwplsda_res) +
+  theme_bw()
+```
+
+![Cross-validated ROC AUC and accuracy versus the localization parameter
+on a log-2 scale. Both decrease as localization
+increases.](lwpls_files/figure-html/classification-tune-plot-1.png)
+
+Performance drops steadily as the models become more global. We compare
+the tuned LW-PLS-DA model with global PLS-DA (a very large
+`localization`) on the test set:
+
+``` r
+
+lwplsda_final <-
+  lwplsda_wflow |>
+  finalize_workflow(select_best(lwplsda_res, metric = "roc_auc")) |>
+  last_fit(para_split, metrics = metric_set(roc_auc, accuracy))
+
+plsda_final <-
+  workflow(
+    class ~ .,
+    lwpls(num_comp = 2, localization = 1e6) |> set_mode("classification")
+  ) |>
+  last_fit(para_split, metrics = metric_set(roc_auc, accuracy))
+
+rbind(
+  data.frame(model = "LW-PLS-DA", collect_metrics(lwplsda_final)),
+  data.frame(model = "Global PLS-DA", collect_metrics(plsda_final))
+)[, c("model", ".metric", ".estimate")]
+#>           model  .metric .estimate
+#> 1     LW-PLS-DA accuracy 0.9200000
+#> 2     LW-PLS-DA  roc_auc 0.9728484
+#> 3 Global PLS-DA accuracy 0.6640000
+#> 4 Global PLS-DA  roc_auc 0.7612705
+```
+
+The decision regions show why. The global model can only separate the
+classes with a straight line, while the local models bend the boundary
+along the parabola. The shading is the predicted probability of
+`Class1`, the black line is the 0.5 contour, and the points are the test
+samples:
+
+``` r
+
+para_grid <- expand.grid(
+  X1 = seq(min(parabolic$X1), max(parabolic$X1), length.out = 100),
+  X2 = seq(min(parabolic$X2), max(parabolic$X2), length.out = 100)
+)
+
+region_probs <- function(final, model) {
+  probs <- predict(extract_workflow(final), para_grid, type = "prob")
+  data.frame(para_grid, model = model, .pred_Class1 = probs$.pred_Class1)
+}
+
+regions <- rbind(
+  region_probs(plsda_final, "Global PLS-DA"),
+  region_probs(lwplsda_final, "LW-PLS-DA")
+)
+
+ggplot(regions, aes(X1, X2)) +
+  geom_raster(aes(fill = .pred_Class1), alpha = 0.8) +
+  geom_contour(aes(z = .pred_Class1), breaks = 0.5, color = "black") +
+  geom_point(data = para_test, aes(shape = class), color = "white", size = 2.6) +
+  geom_point(data = para_test, aes(shape = class, color = class), size = 1.6) +
+  facet_wrap(~model) +
+  scale_fill_distiller(palette = "RdBu", direction = 1, limits = c(0, 1)) +
+  scale_color_manual(values = c(Class1 = "#08306B", Class2 = "#67000D")) +
+  coord_equal(expand = FALSE) +
+  labs(fill = "Probability\nof Class1", color = NULL, shape = NULL) +
+  theme_bw()
+```
+
+![Predicted probability of Class1 over the predictor plane for global
+PLS-DA and LW-PLS-DA, with test samples. The global boundary is a
+straight line; the LW-PLS-DA boundary follows the
+parabola.](lwpls_files/figure-html/classification-regions-1.png)
+
+The ROC curves on the test set summarize the difference across all
+probability thresholds:
+
+``` r
+
+test_roc <- function(final, model) {
+  roc <- roc_curve(collect_predictions(final), truth = class, .pred_Class1)
+  data.frame(model = model, roc)
+}
+
+roc_data <- rbind(
+  test_roc(lwplsda_final, "LW-PLS-DA"),
+  test_roc(plsda_final, "Global PLS-DA")
+)
+
+ggplot(roc_data, aes(1 - specificity, sensitivity, color = model)) +
+  geom_abline(color = "grey50", linetype = 2) +
+  geom_path(linewidth = 0.8) +
+  scale_color_manual(values = c("LW-PLS-DA" = "#08519C", "Global PLS-DA" = "#969696")) +
+  coord_equal() +
+  labs(color = NULL) +
+  theme_bw()
+```
+
+![Test-set ROC curves of LW-PLS-DA and global PLS-DA. The LW-PLS-DA
+curve is closer to the top-left
+corner.](lwpls_files/figure-html/classification-roc-1.png)
+
+Finally, the confusion matrix of the LW-PLS-DA model on the test set:
+
+``` r
+
+collect_predictions(lwplsda_final) |>
+  conf_mat(truth = class, estimate = .pred_class) |>
+  autoplot(type = "heatmap")
+```
+
+![Confusion matrix heatmap of LW-PLS-DA on the test
+set.](lwpls_files/figure-html/classification-confusion-1.png)
+
+Note that in regions without training data, such as the upper-left
+corner, the local models extrapolate from the nearest samples, so their
+predictions should not be over-interpreted.
+
+For more than two classes, the model works the same way and returns one
+`.pred_{level}` probability column per class.
 
 ## Using the engine directly
 
@@ -330,7 +471,5 @@ lwpls(num_comp = 10, localization = 0.5) |>
   active pharmaceutical ingredients content using locally weighted
   partial least squares and statistical wavelength selection.
   *International Journal of Pharmaceutics*, 421(2), 269–274.
-- Kaneko, H. Locally-weighted partial least squares (LWPLS).
-  <https://datachemeng.com/locallyweightedpartialleastsquares/>
 - Dayal, B. S. and MacGregor, J. F. (1997). Improved PLS algorithms.
   *Journal of Chemometrics*, 11(1), 73–85.
