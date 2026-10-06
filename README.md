@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# lwpls <img src="man/figures/logo.png" align="right" height="139" alt="lwpls hex sticker" />
+# lwpls <img src="man/figures/logo.png" alt="lwpls hex sticker" align="right" height="139"/>
 
 <!-- badges: start -->
 
@@ -10,6 +10,7 @@
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![Codecov test
 coverage](https://codecov.io/gh/ChristianGoueguel/lwpls/graph/badge.svg)](https://app.codecov.io/gh/ChristianGoueguel/lwpls)
+
 <!-- badges: end -->
 
 lwpls implements **locally-weighted partial least squares (LW-PLS)** for
@@ -73,14 +74,20 @@ library(lwpls)
 
 data(meats, package = "modeldata")
 meats <- meats |> select(-fat, -protein)
+```
 
+``` r
 set.seed(123)
 meats_split <- initial_split(meats, prop = 0.75)
 meats_folds <- vfold_cv(training(meats_split), v = 5)
 
 lwpls_wflow <- workflow(
   water ~ .,
-  lwpls(num_comp = tune(), localization = tune()) |> set_mode("regression")
+  lwpls(
+    num_comp = tune(), 
+    localization = tune()
+  ) |> 
+    set_mode("regression")
 )
 
 lwpls_grid <- grid_regular(
@@ -90,6 +97,9 @@ lwpls_grid <- grid_regular(
 )
 
 lwpls_res <- tune_grid(lwpls_wflow, meats_folds, grid = lwpls_grid)
+```
+
+``` r
 show_best(lwpls_res, metric = "rmse", n = 3)
 #> # A tibble: 3 × 8
 #>   num_comp localization .metric .estimator  mean     n std_err .config          
@@ -110,27 +120,41 @@ rmse_grid <- lwpls_res |>
   filter(.metric == "rmse") |>
   select(num_comp, localization, rmse = mean)
 best <- slice_min(rmse_grid, rmse)
+```
 
-rmse_mat <- with(rmse_grid, tapply(rmse, list(num_comp, log2(localization)), mean))
-
+``` r
 # color each facet by its mean RMSE
+rmse_mat <- with(rmse_grid, tapply(rmse, list(num_comp, log2(localization)), mean))
 n <- dim(rmse_mat)
-facets <- (rmse_mat[-1, -1] + rmse_mat[-1, -n[2]] +
-  rmse_mat[-n[1], -1] + rmse_mat[-n[1], -n[2]]) / 4
+facets <- (rmse_mat[-1, -1] + rmse_mat[-1, -n[2]] + rmse_mat[-n[1], -1] + rmse_mat[-n[1], -n[2]]) / 4
 blues <- colorRampPalette(c("#cde2fb", "#3987e5", "#0d366b"))(50)
 
 par(mar = c(1, 0, 0, 0))
 view <- persp(
-  x = as.numeric(rownames(rmse_mat)), y = as.numeric(colnames(rmse_mat)),
-  z = rmse_mat, theta = 140, phi = 25, expand = 0.7, ticktype = "detailed",
-  col = blues[cut(facets, 50)], border = "white", lwd = 0.5,
-  xlab = "num_comp", ylab = "log2(localization)", zlab = "RMSE", cex.axis = 0.7
+  x = as.numeric(rownames(rmse_mat)), 
+  y = as.numeric(colnames(rmse_mat)),
+  z = rmse_mat, 
+  theta = 140, 
+  phi = 25, 
+  expand = 0.7, 
+  ticktype = "detailed",
+  col = blues[cut(facets, 50)], 
+  border = "white", 
+  lwd = 0.5,
+  xlab = "num_comp", 
+  ylab = "log2(localization)", 
+  zlab = "RMSE", cex.axis = 0.7
 )
-points(trans3d(best$num_comp, log2(best$localization), best$rmse, view),
-       pch = 21, bg = "#eb6834", col = "white", cex = 1.6)
+points(
+  trans3d(best$num_comp, log2(best$localization), best$rmse, view), 
+  pch = 21, 
+  bg = "#eb6834", 
+  col = "white", 
+  cex = 1.6
+)
 ```
 
-<img src="man/figures/README-tuning-surface-1.png" alt="Cross-validated RMSE as a 3D surface over the number of components and the log-2 localization parameter. RMSE is high with one component and with very small localization values, and lowest in a valley around localization 0.5 with about 10 components." width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
 
 The final model is evaluated on the test set:
 

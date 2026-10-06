@@ -84,7 +84,9 @@ absorbance values for 215 meat samples. We predict the water content.
 #| label: data
 data(meats, package = "modeldata")
 meats <- meats[, !names(meats) %in% c("fat", "protein")]
+```
 
+```{r}
 set.seed(123)
 meats_split <- initial_split(meats, prop = 0.75)
 meats_train <- training(meats_split)
@@ -117,7 +119,9 @@ lwpls_res <- tune_grid(
   grid = lwpls_grid,
   metrics = metric_set(rmse, rsq)
 )
+```
 
+```{r}
 show_best(lwpls_res, metric = "rmse", n = 5)
 ```
 
@@ -150,25 +154,27 @@ hover <- "num_comp: %{x}<br>localization: %{y:.4g}<br>RMSE: %{z:.3f}<extra></ext
 
 plotly::plot_ly() |>
   plotly::add_surface(
-    x = sort(unique(rmse_grid$num_comp)), y = locs, z = rmse_mat,
+    x = sort(unique(rmse_grid$num_comp)), 
+    y = locs, 
+    z = rmse_mat,
     colorscale = list(list(0, "#cde2fb"), list(0.5, "#3987e5"), list(1, "#0d366b")),
     showscale = FALSE, hovertemplate = hover
-  ) |>
+    ) |>
   plotly::add_markers(
-    x = best$num_comp, y = best$localization, z = best$mean,
+    x = best$num_comp, 
+    y = best$localization, 
+    z = best$mean,
     marker = list(size = 6, color = "#eb6834", line = list(color = "white", width = 2)),
     hovertemplate = paste0("<b>Best</b><br>", hover), showlegend = FALSE
-  ) |>
+    ) |>
   plotly::layout(
     scene = list(
       xaxis = list(title = "num_comp"),
       yaxis = list(
         title = "localization", type = "log",
-        tickvals = locs, ticktext = paste0("2<sup>", log2(locs), "</sup>")
-      ),
+        tickvals = locs, ticktext = paste0("2<sup>", log2(locs), "</sup>")),
       zaxis = list(title = "RMSE"),
-      camera = list(eye = list(x = 1.7, y = 1.6, z = 0.8))
-    ),
+      camera = list(eye = list(x = 1.7, y = 1.6, z = 0.8))),
     margin = list(l = 0, r = 0, t = 0, b = 0)
   )
 ```
@@ -316,8 +322,12 @@ With two predictors, local models have at most two components, so we tune
 #| label: classification-tune
 lwplsda_wflow <- workflow(
   class ~ .,
-  lwpls(num_comp = 2, localization = tune()) |> set_mode("classification")
-)
+  lwpls(
+    num_comp = 2, 
+    localization = tune()
+    ) |>
+    set_mode("classification")
+  )
 
 lwplsda_res <- tune_grid(
   lwplsda_wflow,
@@ -351,8 +361,7 @@ lwplsda_final <-
 plsda_final <-
   workflow(
     class ~ .,
-    lwpls(num_comp = 2, localization = 1e6) |> set_mode("classification")
-  ) |>
+    lwpls(num_comp = 2, localization = 1e6) |> set_mode("classification")) |>
   last_fit(para_split, metrics = metric_set(roc_auc, accuracy))
 
 rbind(
