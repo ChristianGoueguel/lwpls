@@ -141,32 +141,23 @@ lwpls_predict_array <- function(object, predictors, num_comp, comps = seq_len(nu
 
   n_comp <- min(num_comp, object$max_comp)
   new_x <- standardize(x[complete, , drop = FALSE], object$x_center, object$x_scale)
-  if (is.null(object$projection)) {
-    dist_x <- object$x
-    dist_new <- new_x
-  } else {
-    dist_x <- object$x %*% object$projection
-    dist_new <- new_x %*% object$projection
-  }
+  args <- kernel_args(object, new_x)
 
-  robust <- isTRUE(object$robust)
-  sparsity <- if (is.null(object$sparsity)) 0 else object$sparsity
-  if (robust || sparsity > 0) {
-    fair <- !robust || object$weight_function == "fair"
+  if (args$robust > 0 || args$sparsity > 0) {
     pred <- lwpls_general_cpp(
       x = object$x,
       y = object$y,
       new_x = new_x,
-      dist_x = dist_x,
-      dist_new = dist_new,
+      dist_x = args$dist_x,
+      dist_new = args$dist_new,
       comps = sort(unique(pmin(comps, n_comp))),
       localization = object$localization,
       neighbors = object$neighbors,
-      sparsity = sparsity,
-      robust = if (!robust) 0L else if (fair) 1L else 2L,
-      fair_c = if (robust && fair) object$robust_constant else 4,
-      hampel_probs = if (robust && !fair) object$robust_constant else c(0.95, 0.975, 0.999),
-      max_iter = if (robust) object$max_iter else 1L,
+      sparsity = args$sparsity,
+      robust = args$robust,
+      fair_c = args$fair_c,
+      hampel_probs = args$hampel_probs,
+      max_iter = args$max_iter,
       classification = object$mode == "classification",
       tol = lwpls_tol
     )
@@ -176,8 +167,8 @@ lwpls_predict_array <- function(object, predictors, num_comp, comps = seq_len(nu
       x = object$x,
       y = object$y,
       new_x = new_x,
-      dist_x = dist_x,
-      dist_new = dist_new,
+      dist_x = args$dist_x,
+      dist_new = args$dist_new,
       num_comp = n_comp,
       localization = object$localization,
       neighbors = object$neighbors,
@@ -195,6 +186,28 @@ lwpls_predict_array <- function(object, predictors, num_comp, comps = seq_len(nu
     res[complete, , seq(n_comp + 1, num_comp)] <- res[complete, , n_comp]
   }
   res
+}
+
+# Settings of the C++ kernels for a fitted model and standardized queries.
+kernel_args <- function(object, new_x) {
+  robust <- isTRUE(object$robust)
+  fair <- !robust || object$weight_function == "fair"
+  if (is.null(object$projection)) {
+    dist_x <- object$x
+    dist_new <- new_x
+  } else {
+    dist_x <- object$x %*% object$projection
+    dist_new <- new_x %*% object$projection
+  }
+  list(
+    dist_x = dist_x,
+    dist_new = dist_new,
+    sparsity = if (is.null(object$sparsity)) 0 else object$sparsity,
+    robust = if (!robust) 0L else if (fair) 1L else 2L,
+    fair_c = if (robust && fair) object$robust_constant else 4,
+    hampel_probs = if (robust && !fair) object$robust_constant else c(0.95, 0.975, 0.999),
+    max_iter = if (robust) object$max_iter else 1L
+  )
 }
 
 # Relative tolerance used to stop extracting components from a local model

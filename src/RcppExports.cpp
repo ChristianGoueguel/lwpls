@@ -53,10 +53,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// lwpls_local_cpp
+Rcpp::List lwpls_local_cpp(const arma::mat& x, const arma::mat& y, const arma::mat& new_x, const arma::mat& dist_x, const arma::mat& dist_new, const int num_comp, const double localization, const int neighbors, const double sparsity, const int robust, const double fair_c, const arma::vec& hampel_probs, const int max_iter, const bool classification, const double tol, const double level);
+RcppExport SEXP _lwpls_lwpls_local_cpp(SEXP xSEXP, SEXP ySEXP, SEXP new_xSEXP, SEXP dist_xSEXP, SEXP dist_newSEXP, SEXP num_compSEXP, SEXP localizationSEXP, SEXP neighborsSEXP, SEXP sparsitySEXP, SEXP robustSEXP, SEXP fair_cSEXP, SEXP hampel_probsSEXP, SEXP max_iterSEXP, SEXP classificationSEXP, SEXP tolSEXP, SEXP levelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type new_x(new_xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type dist_x(dist_xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type dist_new(dist_newSEXP);
+    Rcpp::traits::input_parameter< const int >::type num_comp(num_compSEXP);
+    Rcpp::traits::input_parameter< const double >::type localization(localizationSEXP);
+    Rcpp::traits::input_parameter< const int >::type neighbors(neighborsSEXP);
+    Rcpp::traits::input_parameter< const double >::type sparsity(sparsitySEXP);
+    Rcpp::traits::input_parameter< const int >::type robust(robustSEXP);
+    Rcpp::traits::input_parameter< const double >::type fair_c(fair_cSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type hampel_probs(hampel_probsSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< const bool >::type classification(classificationSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< const double >::type level(levelSEXP);
+    rcpp_result_gen = Rcpp::wrap(lwpls_local_cpp(x, y, new_x, dist_x, dist_new, num_comp, localization, neighbors, sparsity, robust, fair_c, hampel_probs, max_iter, classification, tol, level));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_lwpls_lwpls_predict_cpp", (DL_FUNC) &_lwpls_lwpls_predict_cpp, 9},
     {"_lwpls_lwpls_general_cpp", (DL_FUNC) &_lwpls_lwpls_general_cpp, 15},
+    {"_lwpls_lwpls_local_cpp", (DL_FUNC) &_lwpls_lwpls_local_cpp, 16},
     {NULL, NULL, 0}
 };
 

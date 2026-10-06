@@ -21,6 +21,11 @@ reference:
       - localization
       - similarity
       - sparsity
+  - title: Diagnostics and plots
+    desc: The local models of the predictions and their plots.
+    contents:
+      - lwpls_local
+      - lwpls_plots
   - title: Metrics
     desc: Performance metrics for tuning robust models.
     contents:

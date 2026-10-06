@@ -5,6 +5,8 @@
 #' @useDynLib lwpls, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom generics min_grid
+#' @importFrom ggplot2 autoplot
+#' @importFrom rlang .data
 #' @importFrom parsnip multi_predict
 #' @importFrom stats predict update
 ## usethis namespace: end

@@ -47,6 +47,11 @@ relationships.
 - `lwpls_fit()`: a standalone [hardhat](https://hardhat.tidymodels.org)
   modeling function with matrix, data frame, formula and recipe
   interfaces.
+- **Diagnostics for spectroscopy** (`lwpls_local()`) with
+  publication-ready ggplot2 plots: reliability of each prediction
+  (applicability domain), local regression vectors along the spectrum,
+  robust weights that point to wrong reference values, and wavelengths
+  selected by sparse models.
 
 ## Installation
 
@@ -109,9 +114,27 @@ lwpls_wflow |>
 #> 2 rsq     standard       0.978 pre0_mod0_post0
 ```
 
+Each prediction comes from its own local model. `lwpls_local()` returns
+these models with their diagnostics; for example, their regression
+vectors along the spectrum (100 channels between 850 and 1050 nm) show
+how the bands used change with the water content:
+
+``` r
+final_fit <- lwpls_wflow |>
+  finalize_workflow(select_best(lwpls_res, metric = "rmse")) |>
+  fit(training(meats_split))
+
+final_fit |>
+  lwpls_local(testing(meats_split), wavelength = seq(850, 1050, length.out = 100)) |>
+  plot_coefficients(axis_label = "Wavelength (nm)")
+```
+
+<img src="man/figures/README-coefficients-1.png" alt="Regression coefficients of the local models along the wavelengths, one line per test sample colored by its predicted water content." width="100%" />
+
 See `vignette("lwpls")` for more details, including the comparison with
-global PLS and classification, and `vignette("robust-sparse")` for
-robust and sparse local models.
+global PLS and classification, `vignette("robust-sparse")` for robust
+and sparse local models, and `vignette("diagnostics")` for the
+diagnostic plots.
 
 ## How it works
 

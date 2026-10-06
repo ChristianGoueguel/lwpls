@@ -9,3 +9,7 @@ lwpls_general_cpp <- function(x, y, new_x, dist_x, dist_new, comps, localization
     .Call(`_lwpls_lwpls_general_cpp`, x, y, new_x, dist_x, dist_new, comps, localization, neighbors, sparsity, robust, fair_c, hampel_probs, max_iter, classification, tol)
 }
 
+lwpls_local_cpp <- function(x, y, new_x, dist_x, dist_new, num_comp, localization, neighbors, sparsity, robust, fair_c, hampel_probs, max_iter, classification, tol, level) {
+    .Call(`_lwpls_lwpls_local_cpp`, x, y, new_x, dist_x, dist_new, num_comp, localization, neighbors, sparsity, robust, fair_c, hampel_probs, max_iter, classification, tol, level)
+}
+
