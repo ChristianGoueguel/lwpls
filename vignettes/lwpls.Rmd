@@ -132,6 +132,47 @@ autoplot(lwpls_res, metric = "rmse") +
 Very local models (small `localization`) quickly over-fit, while very large
 values reproduce global PLS. The best models lie in between.
 
+The same results form an RMSE surface over the two hyperparameters, which can
+be explored in 3D with plotly (rendered on the
+[package website](https://christiangoueguel.com/lwpls/articles/lwpls.html)):
+
+```{r}
+#| label: tune-surface
+#| eval: !expr identical(Sys.getenv("IN_PKGDOWN"), "true") && rlang::is_installed(c(pkgs, "plotly"))
+#| fig-height: 5.5
+rmse_grid <- collect_metrics(lwpls_res)
+rmse_grid <- rmse_grid[rmse_grid$.metric == "rmse", ]
+best <- rmse_grid[which.min(rmse_grid$mean), ]
+locs <- sort(unique(rmse_grid$localization))
+# rows: localization, columns: num_comp
+rmse_mat <- with(rmse_grid, tapply(mean, list(localization, num_comp), identity))
+hover <- "num_comp: %{x}<br>localization: %{y:.4g}<br>RMSE: %{z:.3f}<extra></extra>"
+
+plotly::plot_ly() |>
+  plotly::add_surface(
+    x = sort(unique(rmse_grid$num_comp)), y = locs, z = rmse_mat,
+    colorscale = list(list(0, "#cde2fb"), list(0.5, "#3987e5"), list(1, "#0d366b")),
+    showscale = FALSE, hovertemplate = hover
+  ) |>
+  plotly::add_markers(
+    x = best$num_comp, y = best$localization, z = best$mean,
+    marker = list(size = 6, color = "#eb6834", line = list(color = "white", width = 2)),
+    hovertemplate = paste0("<b>Best</b><br>", hover), showlegend = FALSE
+  ) |>
+  plotly::layout(
+    scene = list(
+      xaxis = list(title = "num_comp"),
+      yaxis = list(
+        title = "localization", type = "log",
+        tickvals = locs, ticktext = paste0("2<sup>", log2(locs), "</sup>")
+      ),
+      zaxis = list(title = "RMSE"),
+      camera = list(eye = list(x = 1.7, y = 1.6, z = 0.8))
+    ),
+    margin = list(l = 0, r = 0, t = 0, b = 0)
+  )
+```
+
 We finalize the workflow with the best parameters and evaluate it on the test
 set:
 

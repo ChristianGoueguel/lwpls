@@ -100,8 +100,41 @@ lwpls_res <- tune_grid(lwpls_wflow, meats_folds, grid = lwpls_grid)
 show_best(lwpls_res, metric = "rmse", n = 3)
 ```
 
-The 120 candidate models are evaluated with only 8 fits per resample. The final
-model is evaluated on the test set:
+The 120 candidate models are evaluated with only 8 fits per resample. Their
+cross-validated RMSE forms a surface over the two hyperparameters, with a
+valley between very local models and global PLS (the best model is the orange
+point):
+
+```{r}
+#| label: tuning-surface
+#| fig-alt: "Cross-validated RMSE as a 3D surface over the number of components and the log-2 localization parameter. RMSE is high with one component and with very small localization values, and lowest in a valley around localization 0.5 with about 10 components."
+#| fig-height: 5.5
+rmse_grid <- lwpls_res |>
+  collect_metrics() |>
+  filter(.metric == "rmse") |>
+  select(num_comp, localization, rmse = mean)
+best <- slice_min(rmse_grid, rmse)
+
+rmse_mat <- with(rmse_grid, tapply(rmse, list(num_comp, log2(localization)), mean))
+
+# color each facet by its mean RMSE
+n <- dim(rmse_mat)
+facets <- (rmse_mat[-1, -1] + rmse_mat[-1, -n[2]] +
+  rmse_mat[-n[1], -1] + rmse_mat[-n[1], -n[2]]) / 4
+blues <- colorRampPalette(c("#cde2fb", "#3987e5", "#0d366b"))(50)
+
+par(mar = c(1, 0, 0, 0))
+view <- persp(
+  x = as.numeric(rownames(rmse_mat)), y = as.numeric(colnames(rmse_mat)),
+  z = rmse_mat, theta = 140, phi = 25, expand = 0.7, ticktype = "detailed",
+  col = blues[cut(facets, 50)], border = "white", lwd = 0.5,
+  xlab = "num_comp", ylab = "log2(localization)", zlab = "RMSE", cex.axis = 0.7
+)
+points(trans3d(best$num_comp, log2(best$localization), best$rmse, view),
+       pch = 21, bg = "#eb6834", col = "white", cex = 1.6)
+```
+
+The final model is evaluated on the test set:
 
 ```{r}
 #| label: final
