@@ -30,6 +30,19 @@ The computational engine, usable on its own.
 - [`sparsity()`](https://christiangoueguel.com/lwpls/reference/sparsity.md)
   : Sparsity of the LW-PLS local models
 
+## Diagnostics and plots
+
+The local models of the predictions and their plots.
+
+- [`lwpls_local()`](https://christiangoueguel.com/lwpls/reference/lwpls_local.md)
+  : Local models of LW-PLS predictions
+- [`plot_reliability()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`plot_coefficients()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`plot_robust_weights()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`plot_selection()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`autoplot(`*`<lwpls_local>`*`)`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  : Plots of LW-PLS local models
+
 ## Metrics
 
 Performance metrics for tuning robust models.

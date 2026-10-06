@@ -10,12 +10,12 @@ Locally-weighted partial least squares (LW-PLS) is a just-in-time learning metho
 ). Regression (single or multiple outcomes) and classification (locally weighted partial least squares-discriminant analysis; Bevilacqua and Marini (2014) doi:10.1016/j.aca.2014.05.057
 ) are supported. The local models can be robust to outliers, by partial robust M-regression (Serneels et al. (2005) doi:10.1016/j.chemolab.2005.04.007
 ), and sparse (Hoffmann et al. (2015) doi:10.1016/j.chemolab.2015.09.019
-). The prediction kernel is written in C++ with 'RcppArmadillo', and the model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick' packages so it can be used within the 'tidymodels' framework."><meta property="og:description" content="
+). The prediction kernel is written in C++ with 'RcppArmadillo', and the model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick' packages so it can be used within the 'tidymodels' framework. Diagnostics of the local models (prediction reliability, local regression vectors, robust weights and selected predictors) come with 'ggplot2' plots designed for spectroscopic data."><meta property="og:description" content="
 Locally-weighted partial least squares (LW-PLS) is a just-in-time learning method that builds a dedicated weighted partial least squares model around every new sample, where training samples are weighted by their similarity to that sample (Kim et al. (2011) doi:10.1016/j.ijpharm.2011.10.007
 ). Regression (single or multiple outcomes) and classification (locally weighted partial least squares-discriminant analysis; Bevilacqua and Marini (2014) doi:10.1016/j.aca.2014.05.057
 ) are supported. The local models can be robust to outliers, by partial robust M-regression (Serneels et al. (2005) doi:10.1016/j.chemolab.2005.04.007
 ), and sparse (Hoffmann et al. (2015) doi:10.1016/j.chemolab.2015.09.019
-). The prediction kernel is written in C++ with 'RcppArmadillo', and the model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick' packages so it can be used within the 'tidymodels' framework."><meta property="og:image" content="https://christiangoueguel.com/lwpls/logo.png"></head><body>
+). The prediction kernel is written in C++ with 'RcppArmadillo', and the model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick' packages so it can be used within the 'tidymodels' framework. Diagnostics of the local models (prediction reliability, local regression vectors, robust weights and selected predictors) come with 'ggplot2' plots designed for spectroscopic data."><meta property="og:image" content="https://christiangoueguel.com/lwpls/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -23,7 +23,7 @@ Locally-weighted partial least squares (LW-PLS) is a just-in-time learning metho
 
     <a class="navbar-brand me-2" href="../index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,8 @@ Locally-weighted partial least squares (LW-PLS) is a just-in-time learning metho
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/robust-sparse.html">Robust and sparse LW-PLS</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/diagnostics.html">Diagnostic plots for spectroscopy</a></li>
+    <li><a class="dropdown-item" href="../articles/robust-sparse.html">Robust and sparse LW-PLS</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -49,7 +50,7 @@ Locally-weighted partial least squares (LW-PLS) is a just-in-time learning metho
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>lwpls: Locally-Weighted Partial Least Squares for 'tidymodels'</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ChristianGoueguel/lwpls/blob/0.2.1/R/lwpls-package.R" class="external-link"><code>R/lwpls-package.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ChristianGoueguel/lwpls/blob/master/R/lwpls-package.R" class="external-link"><code>R/lwpls-package.R</code></a></small>
       <div class="d-none name"><code>lwpls-package.Rd</code></div>
     </div>
 
@@ -59,7 +60,7 @@ Locally-weighted partial least squares (LW-PLS) is a just-in-time learning metho
 ). Regression (single or multiple outcomes) and classification (locally weighted partial least squares-discriminant analysis; Bevilacqua and Marini (2014) <a href="https://doi.org/10.1016/j.aca.2014.05.057" class="external-link">doi:10.1016/j.aca.2014.05.057</a>
 ) are supported. The local models can be robust to outliers, by partial robust M-regression (Serneels et al. (2005) <a href="https://doi.org/10.1016/j.chemolab.2005.04.007" class="external-link">doi:10.1016/j.chemolab.2005.04.007</a>
 ), and sparse (Hoffmann et al. (2015) <a href="https://doi.org/10.1016/j.chemolab.2015.09.019" class="external-link">doi:10.1016/j.chemolab.2015.09.019</a>
-). The prediction kernel is written in C++ with 'RcppArmadillo', and the model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick' packages so it can be used within the 'tidymodels' framework.</p>
+). The prediction kernel is written in C++ with 'RcppArmadillo', and the model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick' packages so it can be used within the 'tidymodels' framework. Diagnostics of the local models (prediction reliability, local regression vectors, robust weights and selected predictors) come with 'ggplot2' plots designed for spectroscopic data.</p>
     </div>
 
 

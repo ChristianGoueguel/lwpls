@@ -2,6 +2,7 @@
 <url><loc>https://christiangoueguel.com/lwpls/404.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/LICENSE-text.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/LICENSE.html</loc></url>
+<url><loc>https://christiangoueguel.com/lwpls/articles/diagnostics.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/articles/index.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/articles/lwpls.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/articles/robust-sparse.html</loc></url>
@@ -13,6 +14,8 @@
 <url><loc>https://christiangoueguel.com/lwpls/reference/lwpls-package.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/reference/lwpls.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/reference/lwpls_fit.html</loc></url>
+<url><loc>https://christiangoueguel.com/lwpls/reference/lwpls_local.html</loc></url>
+<url><loc>https://christiangoueguel.com/lwpls/reference/lwpls_plots.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/reference/min_grid.lwpls.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/reference/multi_predict._lwpls_fit.html</loc></url>
 <url><loc>https://christiangoueguel.com/lwpls/reference/predict.lwpls_fit.html</loc></url>

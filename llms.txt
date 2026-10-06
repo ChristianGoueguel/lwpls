@@ -39,6 +39,12 @@ relationships.
 - [`lwpls_fit()`](https://christiangoueguel.com/lwpls/reference/lwpls_fit.md):
   a standalone [hardhat](https://hardhat.tidymodels.org) modeling
   function with matrix, data frame, formula and recipe interfaces.
+- **Diagnostics for spectroscopy**
+  ([`lwpls_local()`](https://christiangoueguel.com/lwpls/reference/lwpls_local.md))
+  with publication-ready ggplot2 plots: reliability of each prediction
+  (applicability domain), local regression vectors along the spectrum,
+  robust weights that point to wrong reference values, and wavelengths
+  selected by sparse models.
 
 ## Installation
 
@@ -104,12 +110,35 @@ lwpls_wflow |>
 #> 2 rsq     standard       0.978 pre0_mod0_post0
 ```
 
+Each prediction comes from its own local model.
+[`lwpls_local()`](https://christiangoueguel.com/lwpls/reference/lwpls_local.md)
+returns these models with their diagnostics; for example, their
+regression vectors along the spectrum (100 channels between 850 and 1050
+nm) show how the bands used change with the water content:
+
+``` r
+
+final_fit <- lwpls_wflow |>
+  finalize_workflow(select_best(lwpls_res, metric = "rmse")) |>
+  fit(training(meats_split))
+
+final_fit |>
+  lwpls_local(testing(meats_split), wavelength = seq(850, 1050, length.out = 100)) |>
+  plot_coefficients(axis_label = "Wavelength (nm)")
+```
+
+![Regression coefficients of the local models along the wavelengths, one
+line per test sample colored by its predicted water
+content.](reference/figures/README-coefficients-1.png)
+
 See
 [`vignette("lwpls")`](https://christiangoueguel.com/lwpls/articles/lwpls.md)
 for more details, including the comparison with global PLS and
-classification, and
+classification,
 [`vignette("robust-sparse")`](https://christiangoueguel.com/lwpls/articles/robust-sparse.md)
-for robust and sparse local models.
+for robust and sparse local models, and
+[`vignette("diagnostics")`](https://christiangoueguel.com/lwpls/articles/diagnostics.md)
+for the diagnostic plots.
 
 ## How it works
 
@@ -185,6 +214,19 @@ The computational engine, usable on its own.
 - [`sparsity()`](https://christiangoueguel.com/lwpls/reference/sparsity.md)
   : Sparsity of the LW-PLS local models
 
+## Diagnostics and plots
+
+The local models of the predictions and their plots.
+
+- [`lwpls_local()`](https://christiangoueguel.com/lwpls/reference/lwpls_local.md)
+  : Local models of LW-PLS predictions
+- [`plot_reliability()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`plot_coefficients()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`plot_robust_weights()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`plot_selection()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  [`autoplot(`*`<lwpls_local>`*`)`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  : Plots of LW-PLS local models
+
 ## Metrics
 
 Performance metrics for tuning robust models.
@@ -197,6 +239,8 @@ Performance metrics for tuning robust models.
 
 ### All vignettes
 
+- [Diagnostic plots for
+  spectroscopy](https://christiangoueguel.com/lwpls/articles/diagnostics.md):
 - [Introduction to
   lwpls](https://christiangoueguel.com/lwpls/articles/lwpls.md):
 - [Robust and sparse

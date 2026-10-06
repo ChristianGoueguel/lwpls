@@ -17,6 +17,9 @@ robust M-regression (Serneels et al. (2005)
 ). The prediction kernel is written in C++ with 'RcppArmadillo', and the
 model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick'
 packages so it can be used within the 'tidymodels' framework.
+Diagnostics of the local models (prediction reliability, local
+regression vectors, robust weights and selected predictors) come with
+'ggplot2' plots designed for spectroscopic data.
 
 ## See also
 

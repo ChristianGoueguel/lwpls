@@ -7,16 +7,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/ChristianGoueguel/lwpls/blob/0.2.1/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/ChristianGoueguel/lwpls/blob/master/DESCRIPTION)
 
 Goueguel C (2026). *lwpls: Locally-Weighted Partial Least Squares for
-'tidymodels'*. R package version 0.2.1,
+'tidymodels'*. R package version 0.2.1.9000,
 <https://github.com/ChristianGoueguel/lwpls>.
 
     @Manual{,
       title = {lwpls: Locally-Weighted Partial Least Squares for 'tidymodels'},
       author = {Christian L. Goueguel},
       year = {2026},
-      note = {R package version 0.2.1},
+      note = {R package version 0.2.1.9000},
       url = {https://github.com/ChristianGoueguel/lwpls},
     }

@@ -1,5 +1,41 @@
 # Changelog
 
+## lwpls (development version)
+
+### New features
+
+- New
+  [`lwpls_local()`](https://christiangoueguel.com/lwpls/reference/lwpls_local.md)
+  returns the local models that LW-PLS builds for new samples, with
+  their diagnostics: the reliability of each prediction (effective
+  number of neighbors, distance to the nearest training sample, and the
+  Hotelling T² and Q statistics of the query in its local model,
+  compared with empirical limits, theoretical limits and as percentile
+  ranks among the training samples of the local model), the regression
+  coefficients and VIP of each local model, the predictors selected by
+  sparse models, and the robust weights of the training samples. It
+  accepts
+  [`lwpls_fit()`](https://christiangoueguel.com/lwpls/reference/lwpls_fit.md)
+  objects, parsnip fits and workflows.
+
+- New ggplot2 plots of the local models, also available with
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html):
+  [`plot_reliability()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  (applicability domain of the predictions),
+  [`plot_coefficients()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  (local regression vectors or VIP along the spectrum, as lines or a
+  heatmap),
+  [`plot_robust_weights()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  (training samples down-weighted by robust models, such as wrong
+  reference values) and
+  [`plot_selection()`](https://christiangoueguel.com/lwpls/reference/lwpls_plots.md)
+  (wavelengths selected by sparse models, per component or overall). The
+  spectral axis is read from the predictor names or given as
+  `wavelength`.
+
+- New vignette,
+  [`vignette("diagnostics")`](https://christiangoueguel.com/lwpls/articles/diagnostics.md).
+
 ## lwpls 0.2.1
 
 ### New features
