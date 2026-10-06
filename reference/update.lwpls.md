@@ -12,6 +12,7 @@ update(
   num_comp = NULL,
   localization = NULL,
   neighbors = NULL,
+  similarity = NULL,
   fresh = FALSE,
   ...
 )
@@ -49,6 +50,12 @@ update(
   The number of nearest training samples used for each local model. The
   default (`NULL`) uses all training samples, as in the original LW-PLS
   algorithm.
+
+- similarity:
+
+  The similarity index: `"euclidean"` (engine default) or `"covariance"`
+  for covariance-based LW-PLS (CbLW-PLS). See Details and
+  [`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md).
 
 - fresh:
 

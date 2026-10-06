@@ -25,6 +25,7 @@ lwpls_fit(
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -36,6 +37,7 @@ lwpls_fit(
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -47,6 +49,7 @@ lwpls_fit(
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -58,6 +61,7 @@ lwpls_fit(
   num_comp = 2L,
   localization = 1,
   neighbors = NULL,
+  similarity = "euclidean",
   scale = TRUE,
   ...
 )
@@ -105,6 +109,14 @@ lwpls_fit(
   Either `NULL` (default), to use all training samples, or the number of
   nearest training samples used to build each local model.
 
+- similarity:
+
+  The similarity index used to weight the training samples:
+  `"euclidean"` (default) or `"covariance"` (covariance-based LW-PLS,
+  CbLW-PLS). See
+  [`lwpls()`](https://christiangoueguel.com/lwpls/reference/lwpls.md)
+  for details.
+
 - scale:
 
   A logical: should the predictors (and numeric outcomes) be
@@ -147,6 +159,7 @@ fit
 #> Predictors:       10 (standardized) 
 #> Components:       3 
 #> Localization:     0.5 
+#> Similarity:       Euclidean 
 #> Neighbors:        all (27) 
 predict(fit, test[, -1])
 #> # A tibble: 5 × 1

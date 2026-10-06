@@ -74,6 +74,7 @@ RcppArmadillo).</p>
 <span>  num_comp <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  localization <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  neighbors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  similarity <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  engine <span class="op">=</span> <span class="st">"lwpls"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -105,6 +106,12 @@ local model. The default (<code>NULL</code>) uses all training samples, as in th
 original LW-PLS algorithm.</p></dd>
 
 
+<dt id="arg-similarity">similarity<a class="anchor" aria-label="anchor" href="#arg-similarity"></a></dt>
+<dd><p>The similarity index: <code>"euclidean"</code> (engine default) or
+<code>"covariance"</code> for covariance-based LW-PLS (CbLW-PLS). See Details and
+<code><a href="similarity.html">similarity()</a></code>.</p></dd>
+
+
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
 <dd><p>A single character string specifying the computational
 engine. Only <code>"lwpls"</code> is available.</p></dd>
@@ -126,6 +133,17 @@ deviation of the distances and \(\varphi\) is the <code>localization</code>
 parameter (\(\lambda\) in Kaneko's implementation). A weighted PLS model
 is then fitted with weighted centering, weighted covariances and the
 query is projected onto its local latent space to obtain the prediction.</p>
+<p>With <code>similarity = "covariance"</code>, the distances are computed after
+projecting the samples on the covariance direction
+\(\Gamma = X^\top Y / \lVert X^\top Y \rVert\) of the training data,
+\(d_i = \lVert \Gamma^\top (x_i - x_q) \rVert\). This covariance-based
+LW-PLS (CbLW-PLS; Hazama and Kano, 2015) accounts for the relationships
+among the predictors and between the predictors and the outcome(s). For a
+single outcome, \(\Gamma\) is the first PLS weight vector; for several
+outcomes (or classes), the distance combines the covariance directions of
+all of them. Hazama and Kano write the weights as
+\(\exp(-\phi d_i / \sigma_d)\), so their \(\phi\) is
+<code>1 / localization</code>.</p>
 <p>When <code>neighbors</code> is set, only the <code>neighbors</code> closest training samples
 receive a non-zero weight and \(\sigma_d\) is computed over their
 distances. This is the "KNN-LW" strategy, which Lesnoff et al. (2020)
@@ -152,6 +170,7 @@ are converted to dummy variables when the model is fitted with a formula.</p>
 <p>Tuning parameters:</p><ul><li><p><code>num_comp</code>: <code><a href="https://dials.tidymodels.org/reference/num_comp.html" class="external-link">dials::num_comp()</a></code></p></li>
 <li><p><code>localization</code>: <code><a href="localization.html">localization()</a></code></p></li>
 <li><p><code>neighbors</code>: <code><a href="https://dials.tidymodels.org/reference/neighbors.html" class="external-link">dials::neighbors()</a></code> (default range 10–200)</p></li>
+<li><p><code>similarity</code>: <code><a href="similarity.html">similarity()</a></code></p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -162,6 +181,10 @@ Pharmaceutics</em>, 421(2), 269–274. <a href="https://doi.org/10.1016/j.ijphar
 <p>Bevilacqua, M. and Marini, F. (2014). Local classification: Locally
 weighted-partial least squares-discriminant analysis (LW-PLS-DA).
 <em>Analytica Chimica Acta</em>, 838, 20–30. <a href="https://doi.org/10.1016/j.aca.2014.05.057" class="external-link">doi:10.1016/j.aca.2014.05.057</a></p>
+<p>Hazama, K. and Kano, M. (2015). Covariance-based locally weighted partial
+least squares for high-performance adaptive modeling. <em>Chemometrics and
+Intelligent Laboratory Systems</em>, 146, 55–62.
+<a href="https://doi.org/10.1016/j.chemolab.2015.05.007" class="external-link">doi:10.1016/j.chemolab.2015.05.007</a></p>
 <p>Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
 weighted PLS strategies for regression and discrimination on agronomic NIR
 data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/10.1002/cem.3209" class="external-link">doi:10.1002/cem.3209</a></p>
@@ -169,7 +192,7 @@ data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/1
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="lwpls_fit.html">lwpls_fit()</a></code> for the underlying fitting function,
-<code><a href="multi_predict._lwpls_fit.html">multi_predict._lwpls_fit()</a></code>, <code><a href="localization.html">localization()</a></code>.</p></div>
+<code><a href="multi_predict._lwpls_fit.html">multi_predict._lwpls_fit()</a></code>, <code><a href="localization.html">localization()</a></code>, <code><a href="similarity.html">similarity()</a></code>.</p></div>
     </div>
 
     <div class="section level2">
@@ -203,6 +226,7 @@ data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/1
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predictors:       10 (standardized) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Components:       3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Localization:     0.5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Similarity:       Euclidean </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Neighbors:        all (27) </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">lwpls_mod</span>, new_data <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 1</span></span>

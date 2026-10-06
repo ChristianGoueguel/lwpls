@@ -24,3 +24,6 @@ The computational engine, usable on its own.
 
 - [`localization()`](https://christiangoueguel.com/lwpls/reference/localization.md)
   : Localization parameter for LW-PLS
+- [`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md)
+  [`values_similarity`](https://christiangoueguel.com/lwpls/reference/similarity.md)
+  : Similarity index for LW-PLS

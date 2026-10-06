@@ -24,6 +24,7 @@ lwpls(
   num_comp = NULL,
   localization = NULL,
   neighbors = NULL,
+  similarity = NULL,
   engine = "lwpls"
 )
 ```
@@ -53,6 +54,12 @@ lwpls(
   default (`NULL`) uses all training samples, as in the original LW-PLS
   algorithm.
 
+- similarity:
+
+  The similarity index: `"euclidean"` (engine default) or `"covariance"`
+  for covariance-based LW-PLS (CbLW-PLS). See Details and
+  [`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md).
+
 - engine:
 
   A single character string specifying the computational engine. Only
@@ -75,6 +82,17 @@ deviation of the distances and \\\varphi\\ is the `localization`
 parameter (\\\lambda\\ in Kaneko's implementation). A weighted PLS model
 is then fitted with weighted centering, weighted covariances and the
 query is projected onto its local latent space to obtain the prediction.
+
+With `similarity = "covariance"`, the distances are computed after
+projecting the samples on the covariance direction \\\Gamma = X^\top Y /
+\lVert X^\top Y \rVert\\ of the training data, \\d_i = \lVert
+\Gamma^\top (x_i - x_q) \rVert\\. This covariance-based LW-PLS
+(CbLW-PLS; Hazama and Kano, 2015) accounts for the relationships among
+the predictors and between the predictors and the outcome(s). For a
+single outcome, \\\Gamma\\ is the first PLS weight vector; for several
+outcomes (or classes), the distance combines the covariance directions
+of all of them. Hazama and Kano write the weights as \\\exp(-\phi d_i /
+\sigma_d)\\, so their \\\phi\\ is `1 / localization`.
 
 When `neighbors` is set, only the `neighbors` closest training samples
 receive a non-zero weight and \\\sigma_d\\ is computed over their
@@ -117,6 +135,9 @@ Tuning parameters:
   [`dials::neighbors()`](https://dials.tidymodels.org/reference/neighbors.html)
   (default range 10–200)
 
+- `similarity`:
+  [`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md)
+
 ## References
 
 Kim, S., Kano, M., Nakagawa, H. and Hasebe, S. (2011). Estimation of
@@ -130,6 +151,11 @@ weighted-partial least squares-discriminant analysis (LW-PLS-DA).
 *Analytica Chimica Acta*, 838, 20–30.
 [doi:10.1016/j.aca.2014.05.057](https://doi.org/10.1016/j.aca.2014.05.057)
 
+Hazama, K. and Kano, M. (2015). Covariance-based locally weighted
+partial least squares for high-performance adaptive modeling.
+*Chemometrics and Intelligent Laboratory Systems*, 146, 55–62.
+[doi:10.1016/j.chemolab.2015.05.007](https://doi.org/10.1016/j.chemolab.2015.05.007)
+
 Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
 weighted PLS strategies for regression and discrimination on agronomic
 NIR data. *Journal of Chemometrics*, 34(5), e3209.
@@ -140,7 +166,8 @@ NIR data. *Journal of Chemometrics*, 34(5), e3209.
 [`lwpls_fit()`](https://christiangoueguel.com/lwpls/reference/lwpls_fit.md)
 for the underlying fitting function,
 [`multi_predict._lwpls_fit()`](https://christiangoueguel.com/lwpls/reference/multi_predict._lwpls_fit.md),
-[`localization()`](https://christiangoueguel.com/lwpls/reference/localization.md).
+[`localization()`](https://christiangoueguel.com/lwpls/reference/localization.md),
+[`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md).
 
 ## Examples
 
@@ -174,6 +201,7 @@ lwpls_mod
 #> Predictors:       10 (standardized) 
 #> Components:       3 
 #> Localization:     0.5 
+#> Similarity:       Euclidean 
 #> Neighbors:        all (27) 
 predict(lwpls_mod, new_data = mtcars[1:5, ])
 #> # A tibble: 5 × 1

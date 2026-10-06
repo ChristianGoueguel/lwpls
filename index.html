@@ -63,8 +63,9 @@
 <ul>
 <li>
 <code><a href="reference/lwpls.html">lwpls()</a></code>: a <a href="https://parsnip.tidymodels.org" class="external-link">parsnip</a> model for <strong>regression</strong> (one or more outcomes) and <strong>classification</strong> (LW-PLS-DA).</li>
+<li>Two similarity indexes: the Euclidean distance of the original LW-PLS, and the covariance-based index of CbLW-PLS (<code>similarity = "covariance"</code>).</li>
 <li>A native implementation, validated against <a href="https://github.com/hkaneko1985/lwpls" class="external-link">Kaneko’s reference implementation</a>, with the prediction kernel written in C++ (<a href="https://cran.r-project.org/package=RcppArmadillo" class="external-link">RcppArmadillo</a>). Queries are processed in blocks, so most of the work runs as BLAS matrix-matrix products.</li>
-<li>Tuning with <a href="https://tune.tidymodels.org" class="external-link">tune</a> and <a href="https://dials.tidymodels.org" class="external-link">dials</a>: <code><a href="reference/localization.html">localization()</a></code> is a tuning parameter, and all values of <code>num_comp</code> are evaluated from a single fit (the “submodel trick”).</li>
+<li>Tuning with <a href="https://tune.tidymodels.org" class="external-link">tune</a> and <a href="https://dials.tidymodels.org" class="external-link">dials</a>: <code><a href="reference/localization.html">localization()</a></code> and <code><a href="reference/similarity.html">similarity()</a></code> are tuning parameters, and all values of <code>num_comp</code> are evaluated from a single fit (the “submodel trick”).</li>
 <li>
 <code><a href="reference/lwpls_fit.html">lwpls_fit()</a></code>: a standalone <a href="https://hardhat.tidymodels.org" class="external-link">hardhat</a> modeling function with matrix, data frame, formula and recipe interfaces.</li>
 </ul>
@@ -138,6 +139,8 @@
 <li>Kim, S., Kano, M., Nakagawa, H. and Hasebe, S. (2011). Estimation of active pharmaceutical ingredients content using locally weighted partial least squares and statistical wavelength selection. <em>International Journal of Pharmaceutics</em>, 421(2), 269–274. <a href="https://doi.org/10.1016/j.ijpharm.2011.10.007" class="external-link">doi:10.1016/j.ijpharm.2011.10.007</a>
 </li>
 <li>Bevilacqua, M. and Marini, F. (2014). Local classification: Locally weighted-partial least squares-discriminant analysis (LW-PLS-DA). <em>Analytica Chimica Acta</em>, 838, 20–30. <a href="https://doi.org/10.1016/j.aca.2014.05.057" class="external-link">doi:10.1016/j.aca.2014.05.057</a>
+</li>
+<li>Hazama, K. and Kano, M. (2015). Covariance-based locally weighted partial least squares for high-performance adaptive modeling. <em>Chemometrics and Intelligent Laboratory Systems</em>, 146, 55–62. <a href="https://doi.org/10.1016/j.chemolab.2015.05.007" class="external-link">doi:10.1016/j.chemolab.2015.05.007</a>
 </li>
 <li>Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally weighted PLS strategies for regression and discrimination on agronomic NIR data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/10.1002/cem.3209" class="external-link">doi:10.1002/cem.3209</a>
 </li>
