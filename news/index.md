@@ -36,6 +36,14 @@
 - New vignette,
   [`vignette("diagnostics")`](https://christiangoueguel.com/lwpls/articles/diagnostics.md).
 
+### Documentation
+
+- The README and
+  [`vignette("lwpls")`](https://christiangoueguel.com/lwpls/articles/lwpls.md)
+  show the cross-validated RMSE as a 3D surface over `num_comp` and
+  `localization` (interactive on the package website, with plotly as a
+  new suggested package).
+
 ## lwpls 0.2.1
 
 ### New features
