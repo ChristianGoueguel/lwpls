@@ -73,6 +73,7 @@
 </div>
 <!-- badges: start -->
 
+<!-- badges: end -->
 <p>lwpls implements <strong>locally-weighted partial least squares (LW-PLS)</strong> for the <a href="https://www.tidymodels.org" class="external-link">tidymodels</a> ecosystem.</p>
 <p>LW-PLS is a just-in-time learning method used in chemometrics and process monitoring (soft sensors). Instead of fitting a single global model, it builds a dedicated weighted PLS model around each new sample, where every training sample is weighted by its similarity to that sample. A linear method can therefore capture nonlinear and time-varying relationships.</p>
 <div class="section level2">
@@ -109,15 +110,19 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ChristianGoueguel/lwpls" class="external-link">lwpls</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
-<span><span class="va">meats</span> <span class="op">&lt;-</span> <span class="va">meats</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">fat</span>, <span class="op">-</span><span class="va">protein</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">meats</span> <span class="op">&lt;-</span> <span class="va">meats</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">fat</span>, <span class="op">-</span><span class="va">protein</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">meats_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">meats</span>, prop <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
 <span><span class="va">meats_folds</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="fu">training</span><span class="op">(</span><span class="va">meats_split</span><span class="op">)</span>, v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">lwpls_wflow</span> <span class="op">&lt;-</span> <span class="fu">workflow</span><span class="op">(</span></span>
 <span>  <span class="va">water</span> <span class="op">~</span> <span class="va">.</span>,</span>
-<span>  <span class="fu"><a href="reference/lwpls.html">lwpls</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, localization <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="reference/lwpls.html">lwpls</a></span><span class="op">(</span></span>
+<span>    num_comp <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span>, </span>
+<span>    localization <span class="op">=</span> <span class="fu">tune</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">set_mode</span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">lwpls_grid</span> <span class="op">&lt;-</span> <span class="fu">grid_regular</span><span class="op">(</span></span>
@@ -126,8 +131,9 @@
 <span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">15</span>, localization <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">lwpls_res</span> <span class="op">&lt;-</span> <span class="fu">tune_grid</span><span class="op">(</span><span class="va">lwpls_wflow</span>, <span class="va">meats_folds</span>, grid <span class="op">=</span> <span class="va">lwpls_grid</span><span class="op">)</span></span>
-<span><span class="fu">show_best</span><span class="op">(</span><span class="va">lwpls_res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">lwpls_res</span> <span class="op">&lt;-</span> <span class="fu">tune_grid</span><span class="op">(</span><span class="va">lwpls_wflow</span>, <span class="va">meats_folds</span>, grid <span class="op">=</span> <span class="va">lwpls_grid</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">show_best</span><span class="op">(</span><span class="va">lwpls_res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 3 × 8</span></span>
 <span><span class="co">#&gt;   num_comp localization .metric .estimator  mean     n std_err .config          </span></span>
 <span><span class="co">#&gt;      &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;            </span></span>
@@ -135,33 +141,45 @@
 <span><span class="co">#&gt; 2       13          0.5 rmse    standard    1.68     5   0.198 pre0_mod101_post0</span></span>
 <span><span class="co">#&gt; 3        9          0.5 rmse    standard    1.70     5   0.174 pre0_mod069_post0</span></span></code></pre></div>
 <p>The 120 candidate models are evaluated with only 8 fits per resample. Their cross-validated RMSE forms a surface over the two hyperparameters, with a valley between very local models and global PLS (the best model is the orange point):</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rmse_grid</span> <span class="op">&lt;-</span> <span class="va">lwpls_res</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">num_comp</span>, <span class="va">localization</span>, rmse <span class="op">=</span> <span class="va">mean</span><span class="op">)</span></span>
-<span><span class="va">best</span> <span class="op">&lt;-</span> <span class="fu">slice_min</span><span class="op">(</span><span class="va">rmse_grid</span>, <span class="va">rmse</span><span class="op">)</span></span>
-<span></span>
+<span><span class="va">best</span> <span class="op">&lt;-</span> <span class="fu">slice_min</span><span class="op">(</span><span class="va">rmse_grid</span>, <span class="va">rmse</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># color each facet by its mean RMSE</span></span>
 <span><span class="va">rmse_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">rmse_grid</span>, <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">rmse</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">num_comp</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">localization</span><span class="op">)</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># color each facet by its mean RMSE</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rmse_mat</span><span class="op">)</span></span>
-<span><span class="va">facets</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span></span>
-<span>  <span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fl">4</span></span>
+<span><span class="va">facets</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="op">-</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="va">rmse_mat</span><span class="op">[</span><span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="op">-</span><span class="va">n</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fl">4</span></span>
 <span><span class="va">blues</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html" class="external-link">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#cde2fb"</span>, <span class="st">"#3987e5"</span>, <span class="st">"#0d366b"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">50</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">view</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/persp.html" class="external-link">persp</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">rmse_mat</span><span class="op">)</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">rmse_mat</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  z <span class="op">=</span> <span class="va">rmse_mat</span>, theta <span class="op">=</span> <span class="fl">140</span>, phi <span class="op">=</span> <span class="fl">25</span>, expand <span class="op">=</span> <span class="fl">0.7</span>, ticktype <span class="op">=</span> <span class="st">"detailed"</span>,</span>
-<span>  col <span class="op">=</span> <span class="va">blues</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span><span class="va">facets</span>, <span class="fl">50</span><span class="op">)</span><span class="op">]</span>, border <span class="op">=</span> <span class="st">"white"</span>, lwd <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  xlab <span class="op">=</span> <span class="st">"num_comp"</span>, ylab <span class="op">=</span> <span class="st">"log2(localization)"</span>, zlab <span class="op">=</span> <span class="st">"RMSE"</span>, cex.axis <span class="op">=</span> <span class="fl">0.7</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">rmse_mat</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">rmse_mat</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  z <span class="op">=</span> <span class="va">rmse_mat</span>, </span>
+<span>  theta <span class="op">=</span> <span class="fl">140</span>, </span>
+<span>  phi <span class="op">=</span> <span class="fl">25</span>, </span>
+<span>  expand <span class="op">=</span> <span class="fl">0.7</span>, </span>
+<span>  ticktype <span class="op">=</span> <span class="st">"detailed"</span>,</span>
+<span>  col <span class="op">=</span> <span class="va">blues</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span><span class="va">facets</span>, <span class="fl">50</span><span class="op">)</span><span class="op">]</span>, </span>
+<span>  border <span class="op">=</span> <span class="st">"white"</span>, </span>
+<span>  lwd <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  xlab <span class="op">=</span> <span class="st">"num_comp"</span>, </span>
+<span>  ylab <span class="op">=</span> <span class="st">"log2(localization)"</span>, </span>
+<span>  zlab <span class="op">=</span> <span class="st">"RMSE"</span>, cex.axis <span class="op">=</span> <span class="fl">0.7</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/grDevices/trans3d.html" class="external-link">trans3d</a></span><span class="op">(</span><span class="va">best</span><span class="op">$</span><span class="va">num_comp</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">best</span><span class="op">$</span><span class="va">localization</span><span class="op">)</span>, <span class="va">best</span><span class="op">$</span><span class="va">rmse</span>, <span class="va">view</span><span class="op">)</span>,</span>
-<span>       pch <span class="op">=</span> <span class="fl">21</span>, bg <span class="op">=</span> <span class="st">"#eb6834"</span>, col <span class="op">=</span> <span class="st">"white"</span>, cex <span class="op">=</span> <span class="fl">1.6</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-tuning-surface-1.png" alt="Cross-validated RMSE as a 3D surface over the number of components and the log-2 localization parameter. RMSE is high with one component and with very small localization values, and lowest in a valley around localization 0.5 with about 10 components." width="100%"></p>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/grDevices/trans3d.html" class="external-link">trans3d</a></span><span class="op">(</span><span class="va">best</span><span class="op">$</span><span class="va">num_comp</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">best</span><span class="op">$</span><span class="va">localization</span><span class="op">)</span>, <span class="va">best</span><span class="op">$</span><span class="va">rmse</span>, <span class="va">view</span><span class="op">)</span>, </span>
+<span>  pch <span class="op">=</span> <span class="fl">21</span>, </span>
+<span>  bg <span class="op">=</span> <span class="st">"#eb6834"</span>, </span>
+<span>  col <span class="op">=</span> <span class="st">"white"</span>, </span>
+<span>  cex <span class="op">=</span> <span class="fl">1.6</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-4-1.png" alt="" width="100%"></p>
 <p>The final model is evaluated on the test set:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lwpls_wflow</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="fu">select_best</span><span class="op">(</span><span class="va">lwpls_res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">last_fit</span><span class="op">(</span><span class="va">meats_split</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -172,7 +190,7 @@
 <span><span class="co">#&gt; 1 rmse    standard       1.38  pre0_mod0_post0</span></span>
 <span><span class="co">#&gt; 2 rsq     standard       0.978 pre0_mod0_post0</span></span></code></pre></div>
 <p>Each prediction comes from its own local model. <code><a href="reference/lwpls_local.html">lwpls_local()</a></code> returns these models with their diagnostics; for example, their regression vectors along the spectrum (100 channels between 850 and 1050 nm) show how the bands used change with the water content:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_fit</span> <span class="op">&lt;-</span> <span class="va">lwpls_wflow</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="fu">select_best</span><span class="op">(</span><span class="va">lwpls_res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">fit</span><span class="op">(</span><span class="fu">training</span><span class="op">(</span><span class="va">meats_split</span><span class="op">)</span><span class="op">)</span></span>
