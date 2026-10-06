@@ -20,7 +20,12 @@ lwpls_fit(x, ...)
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 
@@ -31,7 +36,12 @@ lwpls_fit(x, ...)
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 
@@ -42,7 +52,12 @@ lwpls_fit(x, ...)
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 
@@ -53,7 +68,12 @@ lwpls_fit(x, ...)
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 }
@@ -89,9 +109,27 @@ the number of nearest training samples used to build each local model.}
 samples: \code{"euclidean"} (default) or \code{"covariance"} (covariance-based
 LW-PLS, CbLW-PLS). See \code{\link[=lwpls]{lwpls()}} for details.}
 
+\item{sparsity}{A number in \verb{[0, 1)}: the sparsity threshold \eqn{\eta} of
+the local models (Hoffmann et al., 2015). Zero (default) gives ordinary
+local PLS models.}
+
 \item{scale}{A logical: should the predictors (and numeric outcomes) be
-standardized to unit variance? Predictors are always mean-centered,
-which does not affect the predictions.}
+standardized to unit variance? Predictors are always centered, which
+does not affect the predictions. For robust models, the center and scale
+are the median and the median absolute deviation (MAD).}
+
+\item{robust}{A logical: should the local models be robust to outliers
+(partial robust M-regression, Serneels et al., 2005)?}
+
+\item{weight_function}{The weight function of the robust models:
+\code{"fair"} (default) or \code{"hampel"}.}
+
+\item{robust_constant}{The tuning constant(s) of the weight function: for
+\code{"fair"}, the constant \eqn{c} of the Fair function (default 4); for
+\code{"hampel"}, three increasing probabilities that define the cutoffs
+(default \code{c(0.95, 0.975, 0.999)}). \code{NULL} uses the defaults.}
+
+\item{max_iter}{The maximum number of iterations of the robust models.}
 
 \item{formula}{A formula specifying the outcome terms on the left-hand
 side and the predictor terms on the right-hand side. Multiple numeric
@@ -112,6 +150,9 @@ interfaces.
 LW-PLS is a lazy learner: fitting validates and standardizes the training
 data and stores it together with the hyperparameters. The local models are
 built at prediction time (see \code{\link[=predict.lwpls_fit]{predict.lwpls_fit()}}).
+
+Sparse (\code{sparsity > 0}) and robust (\code{robust = TRUE}) local models are
+described in \code{\link[=lwpls]{lwpls()}}.
 }
 \examples{
 train <- mtcars[-(1:5), ]
@@ -129,6 +170,11 @@ predict(fit2, test)
 # Classification
 fit3 <- lwpls_fit(Species ~ ., data = iris, num_comp = 2)
 predict(fit3, iris[c(1, 51, 101), ], type = "prob")
+
+# Robust and sparse local models
+fit4 <- lwpls_fit(mpg ~ ., data = train, num_comp = 3, robust = TRUE, sparsity = 0.3)
+fit4
+predict(fit4, test)
 }
 \seealso{
 \code{\link[=predict.lwpls_fit]{predict.lwpls_fit()}}, \code{\link[=lwpls]{lwpls()}}

@@ -5,3 +5,7 @@ lwpls_predict_cpp <- function(x, y, new_x, dist_x, dist_new, num_comp, localizat
     .Call(`_lwpls_lwpls_predict_cpp`, x, y, new_x, dist_x, dist_new, num_comp, localization, neighbors, tol)
 }
 
+lwpls_general_cpp <- function(x, y, new_x, dist_x, dist_new, comps, localization, neighbors, sparsity, robust, fair_c, hampel_probs, max_iter, classification, tol) {
+    .Call(`_lwpls_lwpls_general_cpp`, x, y, new_x, dist_x, dist_new, comps, localization, neighbors, sparsity, robust, fair_c, hampel_probs, max_iter, classification, tol)
+}
+

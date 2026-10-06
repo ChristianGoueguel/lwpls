@@ -37,12 +37,25 @@ const double weight_floor = std::numeric_limits<double>::epsilon();
 // bound sqrt(SS_x SS_y) is rounding noise: no component is extracted.
 const double cov_floor = std::sqrt(std::numeric_limits<double>::epsilon());
 
+// Median of the values in `v` (reordered in place).
+double median_inplace(std::vector<double>& v) {
+  const std::size_t n = v.size();
+  const std::size_t mid = n / 2;
+  std::nth_element(v.begin(), v.begin() + mid, v.end());
+  const double upper = v[mid];
+  if (n % 2 == 1) return upper;
+  return 0.5 * (upper + *std::max_element(v.begin(), v.begin() + mid));
+}
+
 // Similarity weights of the training samples for one query. `w` (length n) is
 // overwritten; samples outside the `k` nearest neighbours get a zero weight.
+// With `robust_scale`, the scale of the distances is 1.4826 times their median
+// absolute deviation instead of their standard deviation.
 // Returns the number of non-zero weights.
 arma::uword similarity_weights(const double* dist, const arma::uword n,
                                const arma::uword k, const double localization,
-                               double* w, std::vector<arma::uword>& idx) {
+                               double* w, std::vector<arma::uword>& idx,
+                               const bool robust_scale = false) {
   std::fill(w, w + n, 0.0);
   std::iota(idx.begin(), idx.end(), arma::uword(0));
   if (k < n) {
@@ -66,7 +79,16 @@ arma::uword similarity_weights(const double* dist, const arma::uword n,
     const double dev = dist[idx[s]] - d_mean;
     ss += dev * dev;
   }
-  const double d_sd = k > 1 ? std::sqrt(ss / static_cast<double>(k - 1)) : 0.0;
+  double d_sd = k > 1 ? std::sqrt(ss / static_cast<double>(k - 1)) : 0.0;
+
+  if (robust_scale && k > 1) {
+    std::vector<double> v(k);
+    for (arma::uword s = 0; s < k; ++s) v[s] = dist[idx[s]];
+    const double med = median_inplace(v);
+    for (arma::uword s = 0; s < k; ++s) v[s] = std::abs(dist[idx[s]] - med);
+    const double mad = 1.4826 * median_inplace(v);
+    if (mad > 0.0) d_sd = mad;
+  }
 
   // All distances equal: every sample is equally similar.
   if (!(d_sd > 0.0) || !std::isfinite(d_sd)) {
@@ -281,5 +303,414 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
     }
   }
 
+  return out;
+}
+
+// -----------------------------------------------------------------------------
+// Sparse and robust LW-PLS.
+//
+// Each query gets its own weighted NIPALS model, computed with explicit
+// deflation of the training samples that have a non-zero similarity weight:
+//
+// * Sparsity (SNIPLS; Hoffmann et al. 2015): the weight vector of each
+//   component is soft-thresholded at `sparsity * max|w|`, and the X loadings
+//   are set to zero outside the variables selected so far.
+// * Robustness (partial robust M-regression, PRM; Serneels et al. 2005): the
+//   local model is refitted with case weights that are the products of the
+//   similarity weights, residual weights and leverage weights (Fair or Hampel
+//   functions), until the norm of the regression coefficients of the
+//   normalized scores is stable. Centers and scales are similarity-weighted
+//   medians and a similarity-weighted L1-median, so that the local model is
+//   robust and local at the same time.
+
+namespace {
+
+enum RobustFun { ROBUST_NONE = 0, ROBUST_FAIR = 1, ROBUST_HAMPEL = 2 };
+
+// Weighted median; equal weights give the usual median (the average of the
+// two middle values when their number is even).
+double weighted_median(const arma::vec& x, const arma::vec& w) {
+  const arma::uword n = x.n_elem;
+  const arma::uvec o = arma::sort_index(x);
+  const double total = arma::accu(w);
+  const double half = 0.5 * total;
+  const double eps = 1e-9 * total;
+  double cum = 0.0;
+  for (arma::uword i = 0; i < n; ++i) {
+    cum += w[o[i]];
+    if (cum >= half - eps) {
+      if (std::abs(cum - half) <= eps && i + 1 < n) {
+        return 0.5 * (x[o[i]] + x[o[i + 1]]);
+      }
+      return x[o[i]];
+    }
+  }
+  return x[o[n - 1]];  // # nocov (the cumulative weight reaches one half)
+}
+
+// Weighted median of non-negative values used as a scale: falls back to the
+// weighted median of the positive values, then to one.
+double weighted_scale(const arma::vec& x, const arma::vec& w) {
+  const double s = weighted_median(x, w);
+  if (s > 0.0) return s;
+  const arma::uvec pos = arma::find(x > 0.0);
+  if (pos.n_elem == 0) return 1.0;
+  const arma::vec xp = x.elem(pos);
+  const arma::vec wp = w.elem(pos);
+  return weighted_median(xp, wp);
+}
+
+// Weighted L1-median (spatial median) of the rows of X, by Weiszfeld
+// iterations started at the weighted mean. In one dimension it is the
+// weighted median, where Weiszfeld iterations would converge slowly.
+arma::vec weighted_l1median(const arma::mat& X, const arma::vec& w) {
+  if (X.n_cols == 1) return arma::vec{weighted_median(X.col(0), w)};
+  arma::vec m = X.t() * w / arma::accu(w);
+  for (int it = 0; it < 1000; ++it) {
+    const arma::mat diff = X.each_row() - m.t();
+    arma::vec d = arma::sqrt(arma::sum(arma::square(diff), 1));
+    const double d_max = d.max();
+    if (!(d_max > 0.0)) break;
+    d.transform([d_max](double v) { return std::max(v, 1e-12 * d_max); });
+    const arma::vec v = w / d;
+    const arma::vec m_new = X.t() * v / arma::accu(v);
+    const double step = arma::norm(m_new - m);
+    m = m_new;
+    if (step <= 1e-12 * std::max(1.0, arma::norm(m))) break;
+  }
+  return m;
+}
+
+double fair_weight(const double z, const double c) {
+  const double u = 1.0 + std::abs(z / c);
+  return 1.0 / (u * u);
+}
+
+double hampel_weight(double z, const arma::vec& cut) {
+  z = std::abs(z);
+  if (z <= cut[0]) return 1.0;
+  if (z <= cut[1]) return cut[0] / z;
+  if (z <= cut[2]) return cut[0] * (cut[2] - z) / ((cut[2] - cut[1]) * z);
+  return 0.0;
+}
+
+// Hampel cutoffs: quantiles of the chi distribution with `df` degrees of
+// freedom at the probabilities `probs`.
+arma::vec chi_cutoffs(const arma::vec& probs, const double df) {
+  arma::vec cut(3);
+  for (int i = 0; i < 3; ++i) cut[i] = std::sqrt(R::qchisq(probs[i], df, 1, 0));
+  return cut;
+}
+
+// Weights of the rows of a residual matrix: distances of the robustly
+// centered and scaled residuals, through the Fair or Hampel function.
+arma::vec residual_weights(const arma::mat& E, const arma::vec& om,
+                           const int fun, const double fair_c,
+                           const arma::vec& probs, const double df) {
+  const arma::uword k = E.n_rows;
+  const arma::uword q = E.n_cols;
+  arma::mat rc(E);
+  for (arma::uword c = 0; c < q; ++c) {
+    rc.col(c) -= weighted_median(E.col(c), om);
+    double s = weighted_scale(arma::abs(rc.col(c)), om);
+    if (fun == ROBUST_HAMPEL) s *= 1.4826;
+    rc.col(c) /= s;
+  }
+  const arma::vec d = arma::sqrt(arma::sum(arma::square(rc), 1));
+  arma::vec out(k);
+  if (fun == ROBUST_FAIR) {
+    const double md = weighted_scale(d, om);
+    for (arma::uword i = 0; i < k; ++i) out[i] = fair_weight(d[i] / md, fair_c);
+  } else {
+    const arma::vec cut = chi_cutoffs(probs, std::max(df, 1.0));
+    for (arma::uword i = 0; i < k; ++i) out[i] = hampel_weight(d[i], cut);
+  }
+  return out;
+}
+
+// Weights of the training samples from their distances in the score space.
+arma::vec leverage_weights(const arma::mat& T, const arma::vec& tt,
+                           const arma::vec& om, const int fun,
+                           const double fair_c, const arma::vec& probs) {
+  const arma::uword k = T.n_rows;
+  const arma::uword a = T.n_cols;
+  arma::vec out(k);
+  if (fun == ROBUST_FAIR) {
+    arma::mat Tn(T);
+    for (arma::uword j = 0; j < a; ++j) Tn.col(j) /= std::sqrt(tt[j]);
+    const arma::vec center = weighted_l1median(Tn, om);
+    const arma::vec d =
+        arma::sqrt(arma::sum(arma::square(Tn.each_row() - center.t()), 1));
+    const double md = weighted_scale(d, om);
+    for (arma::uword i = 0; i < k; ++i) out[i] = fair_weight(d[i] / md, fair_c);
+  } else {
+    arma::mat tc(T);
+    for (arma::uword j = 0; j < a; ++j) {
+      tc.col(j) -= weighted_median(T.col(j), om);
+      tc.col(j) /= 1.4826 * weighted_scale(arma::abs(tc.col(j)), om);
+    }
+    const arma::vec d = arma::sqrt(arma::sum(arma::square(tc), 1));
+    const arma::vec cut = chi_cutoffs(probs, static_cast<double>(a));
+    for (arma::uword i = 0; i < k; ++i) out[i] = hampel_weight(d[i], cut);
+  }
+  return out;
+}
+
+struct NipalsFit {
+  arma::mat T;       // k x ncomp training scores
+  arma::mat C;       // q x ncomp Y loadings
+  arma::vec tt;      // t' W t of each component
+  arma::mat pred;    // q x a centered query predictions, 1..a components
+  arma::uword ncomp = 0;  // number of components extracted
+};
+
+// Weighted NIPALS on centered data, with optional SNIPLS sparsity. The query
+// (centered like Xc) is projected along the way.
+NipalsFit weighted_nipals(const arma::mat& Xc, const arma::mat& Yc,
+                          const arma::vec& w, const arma::uword a,
+                          const double sparsity, const arma::vec& xq,
+                          const double tol) {
+  const arma::uword k = Xc.n_rows;
+  const arma::uword p = Xc.n_cols;
+  const arma::uword q = Yc.n_cols;
+  NipalsFit fit;
+  fit.T.zeros(k, a);
+  fit.C.zeros(q, a);
+  fit.tt.zeros(a);
+  fit.pred.zeros(q, a);
+  fit.ncomp = 0;
+
+  arma::mat Xa(Xc);
+  arma::mat Ya(Yc);
+  arma::vec xqa(xq);
+  arma::vec cur(q, arma::fill::zeros);
+  std::vector<char> active(p, 0);
+
+  const double ss_x = arma::accu(arma::sum(arma::square(Xc), 1) % w);
+  const double ss_y = arma::accu(arma::sum(arma::square(Yc), 1) % w);
+  double m_norm0 = 0.0;
+
+  for (arma::uword j = 0; j < a; ++j) {
+    const arma::mat M = Xa.t() * (Ya.each_col() % w);  // p x q
+    const double m_norm = arma::norm(M, "fro");
+    if (j == 0) {
+      m_norm0 = m_norm;
+      if (!std::isfinite(m_norm) ||
+          !(m_norm > cov_floor * std::sqrt(ss_x * ss_y))) {
+        break;
+      }
+    } else if (!(m_norm > tol * m_norm0)) {
+      break;
+    }
+
+    arma::vec wv;
+    if (q == 1) {
+      wv = M.col(0) / m_norm;
+    } else {
+      arma::vec eig_val;
+      arma::mat eig_vec;
+      if (!arma::eig_sym(eig_val, eig_vec, M.t() * M)) break;  // # nocov
+      wv = M * eig_vec.col(q - 1);
+      wv /= arma::norm(wv);
+    }
+
+    if (sparsity > 0.0) {
+      const double thr = sparsity * arma::abs(wv).max();
+      for (arma::uword i = 0; i < p; ++i) {
+        const double aw = std::abs(wv[i]);
+        if (aw >= thr) active[i] = 1;
+        wv[i] = aw > thr ? (wv[i] > 0.0 ? aw - thr : thr - aw) : 0.0;
+      }
+      const double nrm = arma::norm(wv);
+      if (!(nrm > 0.0)) break;
+      wv /= nrm;
+    }
+
+    const arma::vec t = Xa * wv;
+    const double tt = arma::dot(w % t, t);
+    if (!(tt > tol * ss_x) || !std::isfinite(tt)) break;
+    arma::vec pv = Xa.t() * (w % t) / tt;
+    if (sparsity > 0.0) {
+      for (arma::uword i = 0; i < p; ++i) {
+        if (!active[i]) pv[i] = 0.0;
+      }
+    }
+    const arma::vec cv = Ya.t() * (w % t) / tt;
+
+    const double tq = arma::dot(xqa, wv);
+    cur += tq * cv;
+    xqa -= tq * pv;
+    Xa -= t * pv.t();
+    Ya -= t * cv.t();
+
+    fit.T.col(j) = t;
+    fit.C.col(j) = cv;
+    fit.tt[j] = tt;
+    fit.pred.col(j) = cur;
+    fit.ncomp = j + 1;
+  }
+  for (arma::uword j = fit.ncomp; j < a; ++j) fit.pred.col(j) = cur;
+  fit.T = fit.T.head_cols(fit.ncomp);
+  fit.C = fit.C.head_cols(fit.ncomp);
+  fit.tt = fit.tt.head(fit.ncomp);
+  return fit;
+}
+
+}  // namespace
+
+// Predictions of sparse and/or robust LW-PLS models.
+//
+// Arguments as for lwpls_predict_cpp(), and:
+// comps          : numbers of components to predict (1-based). Non-robust
+//                  models give all numbers up to max(comps) from one fit;
+//                  robust models are refitted for each element of `comps`.
+// sparsity       : SNIPLS threshold (0 for none).
+// robust         : 0 (none), 1 (Fair) or 2 (Hampel).
+// fair_c         : constant of the Fair function.
+// hampel_probs   : probabilities of the three Hampel cutoffs.
+// max_iter       : maximum number of PRM fits (at least one).
+// classification : whether y holds class indicators.
+// Returns an m x q x max(comps) array; slices not requested are NaN.
+// [[Rcpp::export(rng = false)]]
+arma::cube lwpls_general_cpp(const arma::mat& x, const arma::mat& y,
+                             const arma::mat& new_x, const arma::mat& dist_x,
+                             const arma::mat& dist_new,
+                             const arma::uvec& comps, const double localization,
+                             const int neighbors, const double sparsity,
+                             const int robust, const double fair_c,
+                             const arma::vec& hampel_probs, const int max_iter,
+                             const bool classification, const double tol) {
+  const arma::uword n = x.n_rows;
+  const arma::uword p = x.n_cols;
+  const arma::uword q = y.n_cols;
+  const arma::uword m = new_x.n_rows;
+  const arma::uword a_max = comps.max();
+  const arma::uword k_nn =
+      std::min(n, static_cast<arma::uword>(std::max(neighbors, 1)));
+  const double prm_tol = 0.01;  // relative change of the coefficient norm
+
+  arma::cube out(m, q, a_max);
+  out.fill(arma::datum::nan);
+  if (m == 0 || n == 0) return out;
+
+  const arma::vec dist_sq = arma::sum(arma::square(dist_x), 1);
+  std::vector<arma::uword> idx(n);
+  arma::vec dist(n);
+  arma::vec omega(n);
+  const double df_res = classification ? static_cast<double>(q) - 1.0
+                                       : static_cast<double>(q);
+
+  for (arma::uword j = 0; j < m; ++j) {
+    if (j % 16 == 0) Rcpp::checkUserInterrupt();
+
+    // Similarity weights.
+    const arma::vec dq = dist_new.row(j).t();
+    const arma::vec cross = dist_x * dq;
+    const double dq_sq = arma::dot(dq, dq);
+    for (arma::uword i = 0; i < n; ++i) {
+      const double d2 = dist_sq[i] + dq_sq - 2.0 * cross[i];
+      dist[i] = d2 > 0.0 ? std::sqrt(d2) : 0.0;
+    }
+    similarity_weights(dist.memptr(), n, k_nn, localization, omega.memptr(),
+                       idx, robust != ROBUST_NONE);
+
+    const arma::uvec rows = arma::find(omega > 0.0);
+    const arma::mat Xs = x.rows(rows);
+    const arma::mat Ys = y.rows(rows);
+    const arma::vec om = omega.elem(rows);
+    const arma::vec xq = new_x.row(j).t();
+    const arma::uword k = rows.n_elem;
+    // A weighted-centred matrix with k rows has rank < k.
+    const arma::uword cap = std::min({a_max, p, k > 0 ? k - 1 : 0});
+
+    if (robust == ROBUST_NONE) {
+      const arma::rowvec cx = (Xs.t() * om).t() / arma::accu(om);
+      const arma::rowvec cy = (Ys.t() * om).t() / arma::accu(om);
+      const arma::mat Xc = Xs.each_row() - cx;
+      const arma::mat Yc = Ys.each_row() - cy;
+      const arma::vec xqc = xq - cx.t();
+      arma::mat pred(q, a_max);
+      if (cap > 0) {
+        const NipalsFit fit = weighted_nipals(Xc, Yc, om, cap, sparsity, xqc, tol);
+        for (arma::uword a = 0; a < a_max; ++a) {
+          pred.col(a) = fit.pred.col(std::min(a, cap - 1));
+        }
+      } else {
+        pred.zeros();
+      }
+      for (arma::uword a = 0; a < a_max; ++a) {
+        for (arma::uword c = 0; c < q; ++c) out(j, c, a) = cy[c] + pred(c, a);
+      }
+      continue;
+    }
+
+    // Robust local model (PRM) ------------------------------------------------
+    const arma::vec cx = weighted_l1median(Xs, om);
+    arma::rowvec cy(q);
+    for (arma::uword c = 0; c < q; ++c) {
+      cy[c] = classification ? arma::dot(Ys.col(c), om) / arma::accu(om)
+                             : weighted_median(Ys.col(c), om);
+    }
+    const arma::mat Xc = Xs.each_row() - cx.t();
+    const arma::mat Yc = Ys.each_row() - cy;
+    const arma::vec xqc = xq - cx;
+
+    // Initial weights from the distances to the centers.
+    const arma::vec dx = arma::sqrt(arma::sum(arma::square(Xc), 1));
+    const double mdx = weighted_scale(dx, om);
+    arma::vec w_init(k);
+    if (robust == ROBUST_FAIR) {
+      for (arma::uword i = 0; i < k; ++i) w_init[i] = fair_weight(dx[i] / mdx, fair_c);
+    } else {
+      arma::vec cut(3);
+      for (int i = 0; i < 3; ++i) cut[i] = R::qnorm(hampel_probs[i], 0.0, 1.0, 1, 0);
+      for (arma::uword i = 0; i < k; ++i) w_init[i] = hampel_weight(dx[i] / mdx, cut);
+    }
+    if (!classification) {
+      w_init %= residual_weights(Yc, om, robust, fair_c, hampel_probs, df_res);
+    }
+    w_init.transform([](double v) { return std::max(v, 1e-6); });
+
+    for (arma::uword ci = 0; ci < comps.n_elem; ++ci) {
+      const arma::uword a_req = comps[ci];
+      const arma::uword a = std::min(a_req, cap);
+      arma::rowvec pred = cy;
+      if (a > 0) {
+        arma::vec wr(w_init);
+        arma::vec w_fit;
+        NipalsFit fit;
+        double gamma = 1e5;
+        double diff = 1.0;
+        int iter = 1;
+        while (diff > prm_tol && iter <= max_iter) {
+          w_fit = om % wr;
+          fit = weighted_nipals(Xc, Yc, w_fit, a, sparsity, xqc, tol);
+          double g = 0.0;
+          for (arma::uword h = 0; h < fit.ncomp; ++h) {
+            g += fit.tt[h] * arma::dot(fit.C.col(h), fit.C.col(h));
+          }
+          g = std::sqrt(g);
+          diff = g > 0.0 ? std::abs(g - gamma) / g : 0.0;
+          gamma = g;
+          if (fit.ncomp == 0) break;
+          const arma::mat E = Yc - fit.T * fit.C.t();
+          wr = residual_weights(E, om, robust, fair_c, hampel_probs, df_res) %
+               leverage_weights(fit.T, fit.tt, om, robust, fair_c, hampel_probs);
+          wr.transform([](double v) { return std::max(v, 1e-6); });
+          ++iter;
+        }
+        // Intercept from the residuals of the last fit: weighted medians, or
+        // weighted means for class indicators so that predictions sum to one.
+        const arma::mat E = fit.ncomp > 0 ? arma::mat(Yc - fit.T * fit.C.t()) : Yc;
+        for (arma::uword c = 0; c < q; ++c) {
+          const double adj = classification
+                                 ? arma::dot(E.col(c), w_fit) / arma::accu(w_fit)
+                                 : weighted_median(E.col(c), om);
+          pred[c] = cy[c] + adj + fit.pred(c, a - 1);
+        }
+      }
+      for (arma::uword c = 0; c < q; ++c) out(j, c, a_req - 1) = pred[c];
+    }
+  }
   return out;
 }

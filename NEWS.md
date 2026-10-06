@@ -1,3 +1,27 @@
+# lwpls (development version)
+
+## New features
+
+* Robust LW-PLS: with `robust = TRUE` (an engine argument of `lwpls()` and an
+  argument of `lwpls_fit()`), each local model is fitted by partial robust
+  M-regression (PRM; Serneels et al., 2005), with the Fair (default) or
+  Hampel weight function. The medians and the L1-median that PRM uses are
+  weighted by the similarity weights, so the robust models stay local. Robust
+  models are available for regression with one or more outcomes and for
+  classification, and they standardize the data and scale the distances with
+  the median and the MAD.
+
+* Sparse LW-PLS: the new `sparsity` argument (a tunable main argument of
+  `lwpls()`, with the dials parameter `sparsity()`) fits the local models by
+  sparse NIPALS (SNIPLS; Hoffmann et al., 2015), so that each local model
+  selects its own predictors. Combined with `robust = TRUE`, it gives local
+  sparse PRM (SPRM).
+
+* New yardstick metric `trimmed_rmse()` to tune robust models on data with
+  outliers.
+
+* New vignette, `vignette("robust-sparse")`.
+
 # lwpls 0.2.0
 
 This is a rewrite of the package. LW-PLS is now implemented natively and no

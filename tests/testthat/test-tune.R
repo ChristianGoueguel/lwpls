@@ -20,18 +20,20 @@ test_that("tunable parameters", {
     num_comp = tune::tune(),
     localization = tune::tune(),
     neighbors = tune::tune(),
-    similarity = tune::tune()
+    similarity = tune::tune(),
+    sparsity = tune::tune()
   ) |>
     parsnip::set_mode("regression")
 
   tunable <- generics::tunable(spec)
-  expect_equal(tunable$name, c("num_comp", "localization", "neighbors", "similarity"))
+  expect_equal(tunable$name, c("num_comp", "localization", "neighbors", "similarity", "sparsity"))
 
   params <- hardhat::extract_parameter_set_dials(spec)
-  expect_equal(params$id, c("num_comp", "localization", "neighbors", "similarity"))
+  expect_equal(params$id, c("num_comp", "localization", "neighbors", "similarity", "sparsity"))
   expect_equal(params$object[[2]]$range, localization()$range)
   expect_equal(params$object[[3]]$range, list(lower = 10L, upper = 200L))
   expect_equal(params$object[[4]]$values, values_similarity)
+  expect_equal(params$object[[5]]$range, sparsity()$range)
 })
 
 test_that("min_grid() uses the submodel trick for num_comp", {

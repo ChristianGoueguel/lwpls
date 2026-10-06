@@ -49,7 +49,10 @@ predict.lwpls_fit <- function(object,
   num_comp <- check_pred_num_comp(object, num_comp, single = TRUE)
 
   forged <- hardhat::forge(new_data, object$blueprint)
-  raw <- lwpls_predict_array(object, forged$predictors, num_comp)
+  # Robust models are refitted for each number of components: only compute
+  # the ones needed.
+  comps <- if (type == "raw") seq_len(num_comp) else num_comp
+  raw <- lwpls_predict_array(object, forged$predictors, num_comp, comps)
   if (type == "raw") {
     return(raw)
   }
@@ -100,7 +103,7 @@ multi_predict._lwpls_fit <- function(object,
 
   new_data <- parsnip::prepare_data(object, new_data)
   forged <- hardhat::forge(new_data, fit$blueprint)
-  raw <- lwpls_predict_array(fit, forged$predictors, max(num_comp))
+  raw <- lwpls_predict_array(fit, forged$predictors, max(num_comp), num_comp)
   n <- dim(raw)[1]
 
   res <- lapply(num_comp, function(a) {
@@ -117,8 +120,10 @@ multi_predict._lwpls_fit <- function(object,
 # ------------------------------------------------------------------------------
 
 # Predictions for 1, ..., num_comp components as an m x q x num_comp array on
-# the original outcome scale. Rows with missing values give NA.
-lwpls_predict_array <- function(object, predictors, num_comp) {
+# the original outcome scale. Rows with missing values give NA. For robust
+# models, only the numbers of components in `comps` are computed; the other
+# slices are NA.
+lwpls_predict_array <- function(object, predictors, num_comp, comps = seq_len(num_comp)) {
   x <- as.matrix(predictors[names(object$x_center)])
   storage.mode(x) <- "double"
   m <- nrow(x)
@@ -143,20 +148,46 @@ lwpls_predict_array <- function(object, predictors, num_comp) {
     dist_x <- object$x %*% object$projection
     dist_new <- new_x %*% object$projection
   }
-  pred <- lwpls_predict_cpp(
-    x = object$x,
-    y = object$y,
-    new_x = new_x,
-    dist_x = dist_x,
-    dist_new = dist_new,
-    num_comp = n_comp,
-    localization = object$localization,
-    neighbors = object$neighbors,
-    tol = lwpls_tol
-  )
 
+  robust <- isTRUE(object$robust)
+  sparsity <- if (is.null(object$sparsity)) 0 else object$sparsity
+  if (robust || sparsity > 0) {
+    fair <- !robust || object$weight_function == "fair"
+    pred <- lwpls_general_cpp(
+      x = object$x,
+      y = object$y,
+      new_x = new_x,
+      dist_x = dist_x,
+      dist_new = dist_new,
+      comps = sort(unique(pmin(comps, n_comp))),
+      localization = object$localization,
+      neighbors = object$neighbors,
+      sparsity = sparsity,
+      robust = if (!robust) 0L else if (fair) 1L else 2L,
+      fair_c = if (robust && fair) object$robust_constant else 4,
+      hampel_probs = if (robust && !fair) object$robust_constant else c(0.95, 0.975, 0.999),
+      max_iter = if (robust) object$max_iter else 1L,
+      classification = object$mode == "classification",
+      tol = lwpls_tol
+    )
+    pred[is.nan(pred)] <- NA_real_
+  } else {
+    pred <- lwpls_predict_cpp(
+      x = object$x,
+      y = object$y,
+      new_x = new_x,
+      dist_x = dist_x,
+      dist_new = dist_new,
+      num_comp = n_comp,
+      localization = object$localization,
+      neighbors = object$neighbors,
+      tol = lwpls_tol
+    )
+  }
+
+  n_slices <- dim(pred)[3]
   for (j in seq_len(q)) {
-    res[complete, j, seq_len(n_comp)] <-
+    res[complete, j, seq_len(n_slices)] <-
       pred[, j, ] * object$y_scale[[j]] + object$y_center[[j]]
   }
   # No component can be added beyond the maximum: repeat the last one.

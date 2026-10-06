@@ -1,7 +1,7 @@
 Package: lwpls
 Type: Package
 Title: Locally-Weighted Partial Least Squares for 'tidymodels'
-Version: 0.2.0
+Version: 0.2.0.9000
 Authors@R: 
     person("Christian L.", "Goueguel", , "christian.goueguel@gmail.com", role = c("aut", "cre"))
 Description: Locally-weighted partial least squares (LW-PLS) is a
@@ -11,10 +11,13 @@ Description: Locally-weighted partial least squares (LW-PLS) is a
     <doi:10.1016/j.ijpharm.2011.10.007>). Regression (single or multiple
     outcomes) and classification (locally weighted partial least
     squares-discriminant analysis; Bevilacqua and Marini (2014)
-    <doi:10.1016/j.aca.2014.05.057>) are supported. The prediction kernel
+    <doi:10.1016/j.aca.2014.05.057>) are supported. The local models can
+    be robust to outliers, by partial robust M-regression (Serneels et al.
+    (2005) <doi:10.1016/j.chemolab.2005.04.007>), and sparse (Hoffmann et
+    al. (2015) <doi:10.1016/j.chemolab.2015.09.019>). The prediction kernel
     is written in C++ with 'RcppArmadillo', and the model is integrated
-    with the 'parsnip', 'dials' and 'tune' packages so it can be used
-    within the 'tidymodels' framework.
+    with the 'parsnip', 'dials', 'tune' and 'yardstick' packages so it can
+    be used within the 'tidymodels' framework.
 License: MIT + file LICENSE
 URL: https://github.com/ChristianGoueguel/lwpls,
     https://christiangoueguel.com/lwpls/
@@ -32,8 +35,10 @@ Imports:
     scales (>= 1.3.0),
     stats,
     tibble,
-    vctrs
+    vctrs,
+    yardstick (>= 1.2.0)
 Suggests: 
+    dplyr,
     ggplot2,
     knitr,
     modeldata,
@@ -45,8 +50,7 @@ Suggests:
     testthat (>= 3.0.0),
     tune (>= 1.1.0),
     withr,
-    workflows,
-    yardstick
+    workflows
 LinkingTo: 
     Rcpp,
     RcppArmadillo

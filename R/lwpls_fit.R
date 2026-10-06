@@ -9,6 +9,9 @@
 #' data and stores it together with the hyperparameters. The local models are
 #' built at prediction time (see [predict.lwpls_fit()]).
 #'
+#' Sparse (`sparsity > 0`) and robust (`robust = TRUE`) local models are
+#' described in [lwpls()].
+#'
 #' @param x Depending on the context:
 #'   * A __data frame__ or __matrix__ of numeric predictors.
 #'   * A __recipe__ specifying a set of preprocessing steps created from
@@ -33,9 +36,22 @@
 #' @param similarity The similarity index used to weight the training
 #'   samples: `"euclidean"` (default) or `"covariance"` (covariance-based
 #'   LW-PLS, CbLW-PLS). See [lwpls()] for details.
+#' @param sparsity A number in `[0, 1)`: the sparsity threshold \eqn{\eta} of
+#'   the local models (Hoffmann et al., 2015). Zero (default) gives ordinary
+#'   local PLS models.
 #' @param scale A logical: should the predictors (and numeric outcomes) be
-#'   standardized to unit variance? Predictors are always mean-centered,
-#'   which does not affect the predictions.
+#'   standardized to unit variance? Predictors are always centered, which
+#'   does not affect the predictions. For robust models, the center and scale
+#'   are the median and the median absolute deviation (MAD).
+#' @param robust A logical: should the local models be robust to outliers
+#'   (partial robust M-regression, Serneels et al., 2005)?
+#' @param weight_function The weight function of the robust models:
+#'   `"fair"` (default) or `"hampel"`.
+#' @param robust_constant The tuning constant(s) of the weight function: for
+#'   `"fair"`, the constant \eqn{c} of the Fair function (default 4); for
+#'   `"hampel"`, three increasing probabilities that define the cutoffs
+#'   (default `c(0.95, 0.975, 0.999)`). `NULL` uses the defaults.
+#' @param max_iter The maximum number of iterations of the robust models.
 #' @param ... Not currently used, but required for extensibility.
 #'
 #' @return A `lwpls_fit` object, which stores the standardized training data,
@@ -58,6 +74,11 @@
 #' # Classification
 #' fit3 <- lwpls_fit(Species ~ ., data = iris, num_comp = 2)
 #' predict(fit3, iris[c(1, 51, 101), ], type = "prob")
+#'
+#' # Robust and sparse local models
+#' fit4 <- lwpls_fit(mpg ~ ., data = train, num_comp = 3, robust = TRUE, sparsity = 0.3)
+#' fit4
+#' predict(fit4, test)
 #' @export
 lwpls_fit <- function(x, ...) {
   UseMethod("lwpls_fit")
@@ -77,12 +98,29 @@ lwpls_fit.data.frame <- function(x,
                                  localization = 1,
                                  neighbors = NULL,
                                  similarity = "euclidean",
+                                 sparsity = 0,
                                  scale = TRUE,
+                                 robust = FALSE,
+                                 weight_function = "fair",
+                                 robust_constant = NULL,
+                                 max_iter = 30L,
                                  ...) {
   rlang::check_dots_empty()
   check_character_outcome(y)
   processed <- hardhat::mold(x, y)
-  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
+  lwpls_bridge(
+    processed,
+    num_comp = num_comp,
+    localization = localization,
+    neighbors = neighbors,
+    similarity = similarity,
+    sparsity = sparsity,
+    scale = scale,
+    robust = robust,
+    weight_function = weight_function,
+    robust_constant = robust_constant,
+    max_iter = max_iter
+  )
 }
 
 #' @export
@@ -93,12 +131,29 @@ lwpls_fit.matrix <- function(x,
                              localization = 1,
                              neighbors = NULL,
                              similarity = "euclidean",
+                             sparsity = 0,
                              scale = TRUE,
+                             robust = FALSE,
+                             weight_function = "fair",
+                             robust_constant = NULL,
+                             max_iter = 30L,
                              ...) {
   rlang::check_dots_empty()
   check_character_outcome(y)
   processed <- hardhat::mold(x, y)
-  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
+  lwpls_bridge(
+    processed,
+    num_comp = num_comp,
+    localization = localization,
+    neighbors = neighbors,
+    similarity = similarity,
+    sparsity = sparsity,
+    scale = scale,
+    robust = robust,
+    weight_function = weight_function,
+    robust_constant = robust_constant,
+    max_iter = max_iter
+  )
 }
 
 #' @export
@@ -109,7 +164,12 @@ lwpls_fit.formula <- function(formula,
                               localization = 1,
                               neighbors = NULL,
                               similarity = "euclidean",
+                              sparsity = 0,
                               scale = TRUE,
+                              robust = FALSE,
+                              weight_function = "fair",
+                              robust_constant = NULL,
+                              max_iter = 30L,
                               ...) {
   rlang::check_dots_empty()
   # With an intercept, factors get the same reference-cell coding as with
@@ -122,7 +182,19 @@ lwpls_fit.formula <- function(formula,
       indicators = "traditional"
     )
   )
-  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
+  lwpls_bridge(
+    processed,
+    num_comp = num_comp,
+    localization = localization,
+    neighbors = neighbors,
+    similarity = similarity,
+    sparsity = sparsity,
+    scale = scale,
+    robust = robust,
+    weight_function = weight_function,
+    robust_constant = robust_constant,
+    max_iter = max_iter
+  )
 }
 
 #' @export
@@ -133,11 +205,28 @@ lwpls_fit.recipe <- function(x,
                              localization = 1,
                              neighbors = NULL,
                              similarity = "euclidean",
+                             sparsity = 0,
                              scale = TRUE,
+                             robust = FALSE,
+                             weight_function = "fair",
+                             robust_constant = NULL,
+                             max_iter = 30L,
                              ...) {
   rlang::check_dots_empty()
   processed <- hardhat::mold(x, data)
-  lwpls_bridge(processed, num_comp, localization, neighbors, similarity, scale)
+  lwpls_bridge(
+    processed,
+    num_comp = num_comp,
+    localization = localization,
+    neighbors = neighbors,
+    similarity = similarity,
+    sparsity = sparsity,
+    scale = scale,
+    robust = robust,
+    weight_function = weight_function,
+    robust_constant = robust_constant,
+    max_iter = max_iter
+  )
 }
 
 # ------------------------------------------------------------------------------
@@ -148,13 +237,23 @@ lwpls_bridge <- function(processed,
                          localization,
                          neighbors,
                          similarity,
+                         sparsity,
                          scale,
+                         robust,
+                         weight_function,
+                         robust_constant,
+                         max_iter,
                          call = rlang::caller_env()) {
   check_whole(num_comp, "num_comp", min = 1, call = call)
   check_positive(localization, "localization", call = call)
   check_whole(neighbors, "neighbors", min = 1, allow_null = TRUE, call = call)
   check_similarity(similarity, call = call)
+  check_sparsity(sparsity, call = call)
   check_bool(scale, "scale", call = call)
+  check_bool(robust, "robust", call = call)
+  weight_function <- check_weight_function(weight_function, call = call)
+  robust_constant <- check_robust_constant(robust_constant, weight_function, call = call)
+  check_whole(max_iter, "max_iter", min = 1, call = call)
 
   predictors <- processed$predictors
   predictors <- predictors[names(predictors) != "(Intercept)"]
@@ -241,7 +340,12 @@ lwpls_bridge <- function(processed,
     localization = localization,
     neighbors = neighbors,
     similarity = similarity,
+    sparsity = sparsity,
     scale = scale,
+    robust = robust,
+    weight_function = weight_function,
+    robust_constant = robust_constant,
+    max_iter = max_iter,
     blueprint = processed$blueprint
   )
 }
@@ -258,7 +362,12 @@ lwpls_fit_impl <- function(x,
                            localization,
                            neighbors,
                            similarity,
+                           sparsity,
                            scale,
+                           robust,
+                           weight_function,
+                           robust_constant,
+                           max_iter,
                            blueprint) {
   n <- nrow(x)
   p <- ncol(x)
@@ -284,20 +393,38 @@ lwpls_fit_impl <- function(x,
     neighbors <- n
   }
 
-  x_center <- colMeans(x)
-  x_scale <- if (scale) column_sd(x) else rep(1, p)
-  names(x_scale) <- names(x_center)
+  # Robust models are standardized with the median and the MAD, so that
+  # outliers do not distort the distances.
+  center_fun <- if (robust) column_median else colMeans
+  scale_fun <- if (robust) column_mad else column_sd
 
-  # Class indicators are only centered: their predictions then sum to one.
-  y_center <- colMeans(y)
-  y_scale <- if (scale && mode == "regression") column_sd(y) else rep(1, ncol(y))
+  x_center <- center_fun(x)
+  x_scale <- if (scale) scale_fun(x) else rep(1, p)
+  names(x_center) <- names(x_scale) <- colnames(x)
+
+  # Class indicators are only centered by their means: their predictions then
+  # sum to one.
+  if (mode == "regression") {
+    y_center <- center_fun(y)
+    y_scale <- if (scale) scale_fun(y) else rep(1, ncol(y))
+  } else {
+    y_center <- colMeans(y)
+    y_scale <- rep(1, ncol(y))
+  }
 
   x <- standardize(x, x_center, x_scale)
   y <- standardize(y, y_center, y_scale)
 
   # CbLW-PLS measures distances after projecting the samples on the
   # covariance direction(s) X'Y (Hazama & Kano, 2015).
-  projection <- if (similarity == "covariance") covariance_projection(x, y)
+  projection <- NULL
+  if (similarity == "covariance") {
+    projection <- if (robust) {
+      robust_covariance_projection(x, y, mode == "classification")
+    } else {
+      covariance_projection(x, y)
+    }
+  }
 
   hardhat::new_model(
     x = x,
@@ -315,7 +442,12 @@ lwpls_fit_impl <- function(x,
     neighbors = as.integer(neighbors),
     similarity = similarity,
     projection = projection,
+    sparsity = as.numeric(sparsity),
     scale = scale,
+    robust = robust,
+    weight_function = weight_function,
+    robust_constant = robust_constant,
+    max_iter = as.integer(max_iter),
     blueprint = blueprint,
     class = "lwpls_fit"
   )
@@ -344,6 +476,18 @@ print.lwpls_fit <- function(x, ...) {
     if (x$neighbors >= n) paste0("all (", n, ")") else x$neighbors,
     "\n"
   )
+  if (x$sparsity > 0) {
+    cat("Sparsity:        ", format(x$sparsity, digits = 4), "(SNIPLS)\n")
+  }
+  if (x$robust) {
+    constant <- if (x$weight_function == "fair") {
+      paste0("c = ", format(x$robust_constant, digits = 4))
+    } else {
+      paste0("p = ", paste(format(x$robust_constant, digits = 4), collapse = ", "))
+    }
+    fun <- if (x$weight_function == "fair") "Fair" else "Hampel"
+    cat("Robust:           ", "PRM, ", fun, " weights (", constant, ")\n", sep = "")
+  }
   invisible(x)
 }
 
@@ -375,6 +519,46 @@ covariance_projection <- function(x, y) {
   } else {
     xy * 0
   }
+}
+
+# Robust version of Gamma: X'WY / ||X'WY||, with the initial weights of partial
+# robust M-regression (Fair function of the distances to the center and, for
+# numeric outcomes, of the absolute centered outcomes).
+robust_covariance_projection <- function(x, y, classification) {
+  w <- fair_weight(row_norms(x) / positive_median(row_norms(x)))
+  if (!classification) {
+    yc <- sweep(y, 2, column_median(y))
+    w <- w * fair_weight(row_norms(yc) / positive_median(row_norms(yc)))
+  }
+  covariance_projection(x * sqrt(w), y * sqrt(w))
+}
+
+fair_weight <- function(z, c = 4) {
+  1 / (1 + abs(z / c))^2
+}
+
+row_norms <- function(x) {
+  sqrt(rowSums(x^2))
+}
+
+# Median of non-negative values used as a scale, ignoring zeros if needed.
+positive_median <- function(x) {
+  res <- stats::median(x)
+  if (res > 0) {
+    return(res)
+  }
+  if (any(x > 0)) stats::median(x[x > 0]) else 1
+}
+
+column_median <- function(x) {
+  apply(x, 2, stats::median)
+}
+
+column_mad <- function(x) {
+  res <- apply(x, 2, stats::mad)
+  bad <- !is.finite(res) | res <= .Machine$double.eps * pmax(abs(column_median(x)), 1)
+  res[bad] <- column_sd(x[, bad, drop = FALSE])
+  res
 }
 
 class_indicators <- function(y) {

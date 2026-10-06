@@ -11,6 +11,7 @@
   localization = NULL,
   neighbors = NULL,
   similarity = NULL,
+  sparsity = NULL,
   fresh = FALSE,
   ...
 )
@@ -39,6 +40,10 @@ original LW-PLS algorithm.}
 \item{similarity}{The similarity index: \code{"euclidean"} (engine default) or
 \code{"covariance"} for covariance-based LW-PLS (CbLW-PLS). See Details and
 \code{\link[=similarity]{similarity()}}.}
+
+\item{sparsity}{A number in \verb{[0, 1)}: the sparsity threshold \eqn{\eta} of
+the local models (engine default: 0, no sparsity). See Details and
+\code{\link[=sparsity]{sparsity()}}.}
 
 \item{fresh}{A logical for whether the arguments should be modified
 in-place or replaced wholesale.}

@@ -20,3 +20,8 @@ reference:
     contents:
       - localization
       - similarity
+      - sparsity
+  - title: Metrics
+    desc: Performance metrics for tuning robust models.
+    contents:
+      - trimmed_rmse

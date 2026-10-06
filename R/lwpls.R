@@ -10,7 +10,9 @@
 #' it popular for soft sensors and spectroscopic calibration.
 #'
 #' The model can be used for regression (one or more numeric outcomes) and
-#' classification (discriminant analysis on class indicators).
+#' classification (discriminant analysis on class indicators). The local
+#' models can also be sparse, so that each one selects its own predictors,
+#' and robust to outliers in the training data.
 #'
 #' There is a single engine, `"lwpls"`, implemented in this package (C++ via
 #' RcppArmadillo).
@@ -29,6 +31,9 @@
 #' @param similarity The similarity index: `"euclidean"` (engine default) or
 #'   `"covariance"` for covariance-based LW-PLS (CbLW-PLS). See Details and
 #'   [similarity()].
+#' @param sparsity A number in `[0, 1)`: the sparsity threshold \eqn{\eta} of
+#'   the local models (engine default: 0, no sparsity). See Details and
+#'   [sparsity()].
 #' @param engine A single character string specifying the computational
 #'   engine. Only `"lwpls"` is available.
 #'
@@ -57,6 +62,54 @@
 #' \eqn{\exp(-\phi d_i / \sigma_d)}{exp(-phi d_i / sigma_d)}, so their \eqn{\phi} is
 #' `1 / localization`.
 #'
+#' # Sparse local models
+#'
+#' With `sparsity` \eqn{\eta > 0}, the local models are fitted by sparse
+#' NIPALS (SNIPLS; Hoffmann et al., 2015): the weight vector of each component
+#' is soft-thresholded at \eqn{\eta \max_j |w_j|}{eta * max|w|}, so that the
+#' predictors with small weights are dropped, and the X loadings are zero
+#' outside the predictors selected so far. Each local model therefore selects
+#' its own predictors, such as the wavelengths relevant around the query. For
+#' several outcomes or classes, the weight vector is the dominant direction of
+#' the covariance with all of them before thresholding.
+#'
+#' # Robust local models
+#'
+#' With the engine argument `robust = TRUE`, each local model is fitted by
+#' partial robust M-regression (PRM; Serneels et al., 2005), which makes it
+#' robust to outlying reference values (vertical outliers) and to outlying
+#' samples in the predictor space (leverage points) among the neighbors of the
+#' query. Each training sample gets the weight
+#' \deqn{\omega_i \, w_i^r \, w_i^t,}{w_i * wr_i * wt_i,}
+#' the product of its similarity weight \eqn{\omega_i}{w_i}, a weight
+#' \eqn{w_i^r}{wr_i} that decreases with its residual in the local model, and a
+#' weight \eqn{w_i^t}{wt_i} that decreases with its distance to the center of
+#' the scores, and the local model is refitted with the new weights until the
+#' norm of its regression coefficients changes by less than 1%. The weights
+#' are given by the Fair function
+#' \eqn{f(z) = 1 / (1 + |z / c|)^2}{f(z) = 1 / (1 + |z / c|)^2} (default,
+#' \eqn{c = 4}) of the residuals and distances divided by their median, or by
+#' the Hampel function, which gives zero weight to the most outlying samples,
+#' with cutoffs at quantiles of the \eqn{\chi}{chi} distribution (Hoffmann et
+#' al., 2015). As in PRM, the local center of the predictors is their
+#' L1-median, the intercept is the median of the residuals, and all these
+#' medians are weighted by the similarity weights, so the model stays local.
+#' For several outcomes, the residual weights use the norm of the scaled
+#' residual vectors; for classification, the indicators are centered by their
+#' (weighted) means so that the predicted indicators still sum to one.
+#'
+#' The robust models also standardize the data by the median and the median
+#' absolute deviation (MAD), and use the MAD of the distances instead of their
+#' standard deviation in the similarity weights. With
+#' `similarity = "covariance"`, \eqn{\Gamma}{Gamma} is computed with the
+#' initial (Fair) weights of PRM.
+#'
+#' The weights depend on the number of components, so a robust model is
+#' refitted for each value of `num_comp`: tuning `num_comp` costs about as
+#' many robust fits as values in the grid.
+#'
+#' # Neighbors
+#'
 #' When `neighbors` is set, only the `neighbors` closest training samples
 #' receive a non-zero weight and \eqn{\sigma_d} is computed over their
 #' distances. This is the "KNN-LW" strategy, which Lesnoff et al. (2020)
@@ -77,11 +130,18 @@
 #'
 #' # Engine details
 #'
-#' The `"lwpls"` engine calls [lwpls_fit()]. It accepts the engine argument
-#' `scale` (logical, default `TRUE`): should the predictors (and numeric
-#' outcomes) be standardized to unit variance? Set it to `FALSE` for spectra
-#' and other data measured on a common scale. Predictors with factor columns
-#' are converted to dummy variables when the model is fitted with a formula.
+#' The `"lwpls"` engine calls [lwpls_fit()]. It accepts the engine arguments:
+#'
+#' * `scale` (logical, default `TRUE`): should the predictors (and numeric
+#'   outcomes) be standardized to unit variance? Set it to `FALSE` for spectra
+#'   and other data measured on a common scale.
+#' * `robust` (logical, default `FALSE`): robust local models (see above).
+#' * `weight_function` (`"fair"`, the default, or `"hampel"`),
+#'   `robust_constant` and `max_iter` (default 30): the settings of the robust
+#'   models, see [lwpls_fit()].
+#'
+#' Predictors with factor columns are converted to dummy variables when the
+#' model is fitted with a formula.
 #'
 #' Tuning parameters:
 #'
@@ -89,6 +149,7 @@
 #' * `localization`: [localization()]
 #' * `neighbors`: [dials::neighbors()] (default range 10--200)
 #' * `similarity`: [similarity()]
+#' * `sparsity`: [sparsity()]
 #'
 #' @references
 #' Kim, S., Kano, M., Nakagawa, H. and Hasebe, S. (2011). Estimation of active
@@ -105,6 +166,14 @@
 #' Intelligent Laboratory Systems*, 146, 55--62.
 #' \doi{10.1016/j.chemolab.2015.05.007}
 #'
+#' Serneels, S., Croux, C., Filzmoser, P. and Van Espen, P. J. (2005). Partial
+#' robust M-regression. *Chemometrics and Intelligent Laboratory Systems*,
+#' 79(1--2), 55--64. \doi{10.1016/j.chemolab.2005.04.007}
+#'
+#' Hoffmann, I., Serneels, S., Filzmoser, P. and Croux, C. (2015). Sparse
+#' partial robust M regression. *Chemometrics and Intelligent Laboratory
+#' Systems*, 149, 50--59. \doi{10.1016/j.chemolab.2015.09.019}
+#'
 #' Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
 #' weighted PLS strategies for regression and discrimination on agronomic NIR
 #' data. *Journal of Chemometrics*, 34(5), e3209. \doi{10.1002/cem.3209}
@@ -112,7 +181,8 @@
 #' @return A model specification object with classes `lwpls` and
 #'   `model_spec`.
 #' @seealso [lwpls_fit()] for the underlying fitting function,
-#'   [multi_predict._lwpls_fit()], [localization()], [similarity()].
+#'   [multi_predict._lwpls_fit()], [localization()], [similarity()],
+#'   [sparsity()].
 #' @examples
 #' lwpls(num_comp = 3, localization = 0.5) |>
 #'   parsnip::set_mode("regression") |>
@@ -126,6 +196,13 @@
 #' lwpls_mod
 #' predict(lwpls_mod, new_data = mtcars[1:5, ])
 #'
+#' # Robust and sparse local models
+#' lwpls(num_comp = 3, sparsity = 0.3) |>
+#'   parsnip::set_mode("regression") |>
+#'   parsnip::set_engine("lwpls", robust = TRUE) |>
+#'   parsnip::fit(mpg ~ ., data = mtcars[-(1:5), ]) |>
+#'   predict(new_data = mtcars[1:5, ])
+#'
 #' # Classification
 #' lwpls(num_comp = 2) |>
 #'   parsnip::set_mode("classification") |>
@@ -137,12 +214,14 @@ lwpls <- function(mode = "unknown",
                   localization = NULL,
                   neighbors = NULL,
                   similarity = NULL,
+                  sparsity = NULL,
                   engine = "lwpls") {
   args <- list(
     num_comp = rlang::enquo(num_comp),
     localization = rlang::enquo(localization),
     neighbors = rlang::enquo(neighbors),
-    similarity = rlang::enquo(similarity)
+    similarity = rlang::enquo(similarity),
+    sparsity = rlang::enquo(sparsity)
   )
 
   parsnip::new_model_spec(
@@ -187,13 +266,15 @@ update.lwpls <- function(object,
                          localization = NULL,
                          neighbors = NULL,
                          similarity = NULL,
+                         sparsity = NULL,
                          fresh = FALSE,
                          ...) {
   args <- list(
     num_comp = rlang::enquo(num_comp),
     localization = rlang::enquo(localization),
     neighbors = rlang::enquo(neighbors),
-    similarity = rlang::enquo(similarity)
+    similarity = rlang::enquo(similarity),
+    sparsity = rlang::enquo(sparsity)
   )
 
   parsnip::update_spec(
@@ -213,6 +294,7 @@ check_args.lwpls <- function(object, call = rlang::caller_env()) {
   check_positive(args$localization, "localization", allow_null = TRUE, call = call)
   check_whole(args$neighbors, "neighbors", min = 1, allow_null = TRUE, call = call)
   check_similarity(args$similarity, allow_null = TRUE, call = call)
+  check_sparsity(args$sparsity, allow_null = TRUE, call = call)
   invisible(object)
 }
 
