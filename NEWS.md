@@ -1,4 +1,4 @@
-# lwpls (development version)
+# lwpls 0.2.0
 
 This is a rewrite of the package. LW-PLS is now implemented natively and no
 longer depends on the archived rnirs package.
@@ -40,7 +40,9 @@ longer depends on the archived rnirs package.
 * The `"lwpls"` engine has a `scale` argument to switch off the
   standardization of the data.
 
-* Added unit tests and an introductory vignette (`vignette("lwpls")`).
+* Added unit tests (with test coverage tracked on Codecov) and an introductory
+  vignette (`vignette("lwpls")`), including regression and classification
+  examples.
 
 # lwpls 0.1.0
 
