@@ -2,32 +2,127 @@
 % Please edit documentation in R/lwpls.R
 \name{lwpls}
 \alias{lwpls}
-\title{General Interface for Locally-Weighted Partial Least Squares (LWPLS)}
+\title{Locally-weighted partial least squares}
 \usage{
-lwpls(mode = "unknown", num_comp = NULL, neighbors = NULL)
+lwpls(
+  mode = "unknown",
+  num_comp = NULL,
+  localization = NULL,
+  neighbors = NULL,
+  engine = "lwpls"
+)
 }
 \arguments{
-\item{mode}{A single character string for the type of model.
-Possible values for this model are "unknown", "regression", or "classification".}
+\item{mode}{A single character string for the prediction outcome mode.
+Possible values are \code{"unknown"}, \code{"regression"}, or \code{"classification"}.}
 
-\item{num_comp}{The number of components to retain in the local PLS models.}
+\item{num_comp}{The number of PLS components (latent variables) in each
+local model (engine default: 2).}
 
-\item{neighbors}{The number of neighbors considered at each prediction.}
+\item{localization}{A positive number controlling how local the models
+are (engine default: 1). Small values give large weights to the closest
+training samples only; large values give all samples similar weights, so
+that LW-PLS tends to a global PLS model. See Details.}
+
+\item{neighbors}{The number of nearest training samples used for each
+local model. The default (\code{NULL}) uses all training samples, as in the
+original LW-PLS algorithm.}
+
+\item{engine}{A single character string specifying the computational
+engine. Only \code{"lwpls"} is available.}
+}
+\value{
+A model specification object with classes \code{lwpls} and
+\code{model_spec}.
 }
 \description{
-General Interface for Locally-Weighted Partial Least Squares (LWPLS)
+\code{lwpls()} defines a locally-weighted partial least squares (LW-PLS) model
+for use with the \link[parsnip:parsnip]{parsnip} package. LW-PLS is a
+\emph{just-in-time} (lazy) learner: instead of fitting one global model, a
+dedicated weighted PLS model is built around every new sample, where each
+training sample is weighted by its similarity to that sample. This lets a
+linear method capture nonlinear and time-varying relationships, which makes
+it popular for soft sensors and spectroscopic calibration.
+
+The model can be used for regression (one or more numeric outcomes) and
+classification (discriminant analysis on class indicators).
+
+There is a single engine, \code{"lwpls"}, implemented in this package (C++ via
+RcppArmadillo).
 }
+\details{
+For a query sample \eqn{x_q}, the similarity weight of the training sample
+\eqn{x_i} is
+
+\deqn{\omega_i = \exp\left(-\frac{d_i}{\sigma_d \, \varphi}\right),}
+
+where \eqn{d_i = \lVert x_i - x_q \rVert} is the Euclidean distance (on
+standardized predictors by default), \eqn{\sigma_d} is the standard
+deviation of the distances and \eqn{\varphi} is the \code{localization}
+parameter (\eqn{\lambda} in Kaneko's implementation). A weighted PLS model
+is then fitted with weighted centering, weighted covariances and the
+query is projected onto its local latent space to obtain the prediction.
+
+When \code{neighbors} is set, only the \code{neighbors} closest training samples
+receive a non-zero weight and \eqn{\sigma_d} is computed over their
+distances.
+
+For classification, the outcome is converted to class indicator columns
+and modeled with a multi-response LW-PLS (LW-PLS-DA). The predicted class
+is the one with the largest predicted indicator. Class probabilities are
+obtained by truncating the predicted indicators to \verb{[0, 1]} and
+renormalizing them to sum to one.
+
+Because LW-PLS is a lazy learner, fitting only stores the (standardized)
+training data; the computational work happens at prediction time. A
+prediction for \code{num_comp} components also yields the predictions for all
+smaller numbers of components, so \code{\link[tune:tune_grid]{tune::tune_grid()}} evaluates every value
+of \code{num_comp} from a single model (the "submodel trick").
+}
+\section{Engine details}{
+The \code{"lwpls"} engine calls \code{\link[=lwpls_fit]{lwpls_fit()}}. It accepts the engine argument
+\code{scale} (logical, default \code{TRUE}): should the predictors (and numeric
+outcomes) be standardized to unit variance? Set it to \code{FALSE} for spectra
+and other data measured on a common scale. Predictors with factor columns
+are converted to dummy variables when the model is fitted with a formula.
+
+Tuning parameters:
+\itemize{
+\item \code{num_comp}: \code{\link[dials:num_comp]{dials::num_comp()}}
+\item \code{localization}: \code{\link[=localization]{localization()}}
+\item \code{neighbors}: \code{\link[dials:neighbors]{dials::neighbors()}} (default range 10--200)
+}
+}
+
 \examples{
-lwpls() \%>\%
-  parsnip::set_args(num_comp = 2, neighbors = 2) \%>\%
-  parsnip::set_engine("rnirs") \%>\%
-  parsnip::set_mode("regression") \%>\%
+lwpls(num_comp = 3, localization = 0.5) |>
+  parsnip::set_mode("regression") |>
   parsnip::translate()
 
-lwpls() \%>\%
-  parsnip::set_args(num_comp = 5, neighbors = 3) \%>\%
-  parsnip::set_engine("rnirs") \%>\%
-  parsnip::set_mode("classification") \%>\%
-  parsnip::translate()
+lwpls_mod <-
+  lwpls(num_comp = 3, localization = 0.5) |>
+  parsnip::set_mode("regression") |>
+  parsnip::fit(mpg ~ ., data = mtcars[-(1:5), ])
 
+lwpls_mod
+predict(lwpls_mod, new_data = mtcars[1:5, ])
+
+# Classification
+lwpls(num_comp = 2) |>
+  parsnip::set_mode("classification") |>
+  parsnip::fit(Species ~ ., data = iris) |>
+  predict(new_data = iris[c(1, 51, 101), ], type = "prob")
+}
+\references{
+Kim, S., Kano, M., Nakagawa, H. and Hasebe, S. (2011). Estimation of active
+pharmaceutical ingredients content using locally weighted partial least
+squares and statistical wavelength selection. \emph{International Journal of
+Pharmaceutics}, 421(2), 269--274. \doi{10.1016/j.ijpharm.2011.10.007}
+
+Kaneko, H. Locally-weighted partial least squares (LWPLS).
+\url{https://datachemeng.com/locallyweightedpartialleastsquares/}
+}
+\seealso{
+\code{\link[=lwpls_fit]{lwpls_fit()}} for the underlying fitting function,
+\code{\link[=multi_predict._lwpls_fit]{multi_predict._lwpls_fit()}}, \code{\link[=localization]{localization()}}.
 }

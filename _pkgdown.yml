@@ -1,0 +1,20 @@
+url: https://christiangoueguel.com/lwpls/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Model specification
+    desc: Locally-weighted PLS models for parsnip and tidymodels.
+    contents:
+      - lwpls
+      - update.lwpls
+  - title: Fitting and prediction
+    desc: The computational engine, usable on its own.
+    contents:
+      - lwpls_fit
+      - predict.lwpls_fit
+      - multi_predict._lwpls_fit
+  - title: Tuning parameters
+    contents:
+      - localization

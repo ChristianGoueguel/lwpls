@@ -2,41 +2,53 @@
 % Please edit documentation in R/lwpls.R
 \name{update.lwpls}
 \alias{update.lwpls}
-\title{General Interface for Updating Models Parameters}
+\title{Update a locally-weighted PLS specification}
 \usage{
 \method{update}{lwpls}(
   object,
   parameters = NULL,
   num_comp = NULL,
+  localization = NULL,
   neighbors = NULL,
   fresh = FALSE,
   ...
 )
 }
 \arguments{
-\item{object}{lwpls model specification.}
+\item{object}{A \code{\link[=lwpls]{lwpls()}} model specification.}
 
-\item{parameters}{A 1-row tibble or named list with \emph{main}
-parameters to update. If the individual arguments are used,
-these will supersede the values in \code{parameters}. Also, using
-engine arguments in this object will result in an error.}
+\item{parameters}{A 1-row tibble or named list with \emph{main} parameters to
+update. Use \strong{either} \code{parameters} \strong{or} the main arguments directly
+when updating. If the main arguments are used, these will supersede the
+values in \code{parameters}. Also, using engine arguments in this object will
+result in an error.}
 
-\item{num_comp}{The number of components to retain in the local PLS models.}
+\item{num_comp}{The number of PLS components (latent variables) in each
+local model (engine default: 2).}
 
-\item{neighbors}{The number of neighbors considered at each prediction.}
+\item{localization}{A positive number controlling how local the models
+are (engine default: 1). Small values give large weights to the closest
+training samples only; large values give all samples similar weights, so
+that LW-PLS tends to a global PLS model. See Details.}
 
-\item{fresh}{A logical for whether the arguments should be
-modified in-place of or replaced wholesale.}
+\item{neighbors}{The number of nearest training samples used for each
+local model. The default (\code{NULL}) uses all training samples, as in the
+original LW-PLS algorithm.}
+
+\item{fresh}{A logical for whether the arguments should be modified
+in-place or replaced wholesale.}
 
 \item{...}{Not used for \code{update()}.}
 }
+\value{
+An updated model specification.
+}
 \description{
-General Interface for Updating Models Parameters
+Update a locally-weighted PLS specification
 }
 \examples{
-model <- lwpls(neighbors =  3)
-model
-update(model, neighbors = 1)
-update(model, neighbors = 1, fresh = TRUE)
-
+spec <- lwpls(num_comp = 3)
+spec
+update(spec, localization = 0.25)
+update(spec, localization = 0.25, fresh = TRUE)
 }

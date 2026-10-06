@@ -4,9 +4,8 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<img src='man/figures/logo.png' align="right" height="145" />
-
-```{r, include = FALSE}
+```{r}
+#| include: false
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -15,23 +14,113 @@ knitr::opts_chunk$set(
 )
 ```
 
-# lwpls
+# lwpls <img src="man/figures/logo.png" align="right" height="139" alt="lwpls hex sticker" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/workflows/R-CMD-check/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions)
+[![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-Parsnip wrappers to fit locally-weighted partial least squares models.
+lwpls implements **locally-weighted partial least squares (LW-PLS)** for the
+[tidymodels](https://www.tidymodels.org) ecosystem.
+
+LW-PLS is a just-in-time learning method used in chemometrics and process
+monitoring (soft sensors). Instead of fitting a single global model, it builds a
+dedicated weighted PLS model around each new sample, where every training sample
+is weighted by its similarity to that sample. A linear method can therefore
+capture nonlinear and time-varying relationships.
+
+## Features
+
+* `lwpls()`: a [parsnip](https://parsnip.tidymodels.org) model for
+  **regression** (one or more outcomes) and **classification** (LW-PLS-DA).
+* A native implementation, validated against
+  [Kaneko's reference implementation](https://github.com/hkaneko1985/lwpls),
+  with the prediction kernel written in C++
+  ([RcppArmadillo](https://cran.r-project.org/package=RcppArmadillo)).
+  Queries are processed in blocks, so most of the work runs as BLAS
+  matrix-matrix products.
+* Tuning with [tune](https://tune.tidymodels.org) and
+  [dials](https://dials.tidymodels.org): `localization()` is a tuning parameter,
+  and all values of `num_comp` are evaluated from a single fit (the "submodel
+  trick").
+* `lwpls_fit()`: a standalone [hardhat](https://hardhat.tidymodels.org)
+  modeling function with matrix, data frame, formula and recipe interfaces.
 
 ## Installation
 
 Install the development version from [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("ChristianGoueguel/lwpls")
+# install.packages("pak")
+pak::pak("ChristianGoueguel/lwpls")
 ```
 
-Under construction...!
+## Example
 
+Predict the water content of meat samples from their near-infrared spectra and
+tune both hyperparameters with cross-validation:
+
+```{r}
+#| label: example
+#| message: false
+library(tidymodels)
+library(lwpls)
+
+data(meats, package = "modeldata")
+meats <- meats |> select(-fat, -protein)
+
+set.seed(123)
+meats_split <- initial_split(meats, prop = 0.75)
+meats_folds <- vfold_cv(training(meats_split), v = 5)
+
+lwpls_wflow <- workflow(
+  water ~ .,
+  lwpls(num_comp = tune(), localization = tune()) |> set_mode("regression")
+)
+
+lwpls_grid <- grid_regular(
+  num_comp(c(1, 15)),
+  localization(),
+  levels = c(num_comp = 15, localization = 8)
+)
+
+lwpls_res <- tune_grid(lwpls_wflow, meats_folds, grid = lwpls_grid)
+show_best(lwpls_res, metric = "rmse", n = 3)
+```
+
+The 120 candidate models are evaluated with only 8 fits per resample. The final
+model is evaluated on the test set:
+
+```{r}
+#| label: final
+lwpls_wflow |>
+  finalize_workflow(select_best(lwpls_res, metric = "rmse")) |>
+  last_fit(meats_split) |>
+  collect_metrics()
+```
+
+See `vignette("lwpls")` for more details, including the comparison with global
+PLS and classification.
+
+## How it works
+
+For a query sample $x_q$, each training sample $x_i$ receives the weight
+
+$$\omega_i = \exp\left(-\frac{\lVert x_i - x_q \rVert}{\sigma_d \, \varphi}\right)$$
+
+where $\sigma_d$ is the standard deviation of the distances and $\varphi$ is
+the `localization` parameter. A PLS model with `num_comp` components is then
+fitted with these weights, and the query is projected onto it. Small values of
+$\varphi$ give very local models; large values give global PLS.
+
+## References
+
+* Kim, S., Kano, M., Nakagawa, H. and Hasebe, S. (2011). Estimation of active
+  pharmaceutical ingredients content using locally weighted partial least
+  squares and statistical wavelength selection. *International Journal of
+  Pharmaceutics*, 421(2), 269–274.
+  [doi:10.1016/j.ijpharm.2011.10.007](https://doi.org/10.1016/j.ijpharm.2011.10.007)
+* Kaneko, H. Locally-weighted partial least squares (LWPLS).
+  <https://datachemeng.com/locallyweightedpartialleastsquares/> and
+  <https://github.com/hkaneko1985/lwpls>.

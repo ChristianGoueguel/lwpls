@@ -1,3 +1,5 @@
+# Script used to create the package hex sticker (not part of the package).
+
 library(car)
 
 X <- seq(1, 101)
@@ -17,10 +19,10 @@ image3d <- scatter3d(
   axis.scales = FALSE
   )
 
-rgl::rgl.snapshot(filename = "image3d.png")
+rgl::rgl.snapshot(filename = "data-raw/image3d.png")
 
 hexSticker::sticker(
-  subplot = "~/Documents/Packages/lwpls/image3d.png",
+  subplot = "data-raw/image3d.png",
   package = "lwpls",
   p_y = 1.55,
   p_x = 1.05,
