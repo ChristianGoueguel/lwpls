@@ -71,7 +71,8 @@ The two main hyperparameters are therefore:
   global PLS model.
 
 Optionally, `neighbors` restricts each local model to the nearest training
-samples, which reduces the cost of each local model for large training sets.
+samples (the "KNN-LW" strategy compared with the original LW-PLS by Lesnoff et
+al., 2020).
 
 ## Regression: fat-free water content of meat from NIR spectra
 
@@ -193,8 +194,9 @@ ggplot(test_preds, aes(water, .pred)) +
 
 ## Classification
 
-For a factor outcome, LW-PLS models the class indicators (LW-PLS-DA). The
-predicted class is the one with the largest predicted indicator, and the
+For a factor outcome, LW-PLS models the class indicators: this is
+locally weighted partial least squares-discriminant analysis (LW-PLS-DA,
+Bevilacqua and Marini, 2014). The predicted class is the one with the largest predicted indicator, and the
 indicators, truncated to $[0, 1]$, give the class probabilities.
 
 Because every local model is linear but fitted around its own query, LW-PLS-DA
@@ -391,5 +393,11 @@ lwpls(num_comp = 10, localization = 0.5) |>
   pharmaceutical ingredients content using locally weighted partial least
   squares and statistical wavelength selection. *International Journal of
   Pharmaceutics*, 421(2), 269--274.
+* Bevilacqua, M. and Marini, F. (2014). Local classification: Locally
+  weighted-partial least squares-discriminant analysis (LW-PLS-DA).
+  *Analytica Chimica Acta*, 838, 20--30.
+* Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
+  weighted PLS strategies for regression and discrimination on agronomic NIR
+  data. *Journal of Chemometrics*, 34(5), e3209.
 * Dayal, B. S. and MacGregor, J. F. (1997). Improved PLS algorithms.
   *Journal of Chemometrics*, 11(1), 73--85.

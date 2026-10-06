@@ -44,10 +44,12 @@
 #'
 #' When `neighbors` is set, only the `neighbors` closest training samples
 #' receive a non-zero weight and \eqn{\sigma_d} is computed over their
-#' distances.
+#' distances. This is the "KNN-LW" strategy, which Lesnoff et al. (2020)
+#' compare with the original LW-PLS that weights all training samples.
 #'
 #' For classification, the outcome is converted to class indicator columns
-#' and modeled with a multi-response LW-PLS (LW-PLS-DA). The predicted class
+#' and modeled with a multi-response LW-PLS (LW-PLS-DA; Bevilacqua and Marini,
+#' 2014). The predicted class
 #' is the one with the largest predicted indicator. Class probabilities are
 #' obtained by truncating the predicted indicators to `[0, 1]` and
 #' renormalizing them to sum to one.
@@ -77,6 +79,14 @@
 #' pharmaceutical ingredients content using locally weighted partial least
 #' squares and statistical wavelength selection. *International Journal of
 #' Pharmaceutics*, 421(2), 269--274. \doi{10.1016/j.ijpharm.2011.10.007}
+#'
+#' Bevilacqua, M. and Marini, F. (2014). Local classification: Locally
+#' weighted-partial least squares-discriminant analysis (LW-PLS-DA).
+#' *Analytica Chimica Acta*, 838, 20--30. \doi{10.1016/j.aca.2014.05.057}
+#'
+#' Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
+#' weighted PLS strategies for regression and discrimination on agronomic NIR
+#' data. *Journal of Chemometrics*, 34(5), e3209. \doi{10.1002/cem.3209}
 #'
 #' @return A model specification object with classes `lwpls` and
 #'   `model_spec`.
