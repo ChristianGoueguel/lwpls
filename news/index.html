@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,15 +33,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="lwpls-development-version">lwpls (development version)<a class="anchor" aria-label="anchor" href="#lwpls-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="lwpls-020">lwpls 0.2.0<a class="anchor" aria-label="anchor" href="#lwpls-020"></a></h2>
 <p>This is a rewrite of the package. LW-PLS is now implemented natively and no longer depends on the archived rnirs package.</p>
 <div class="section level3">
-<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
 <ul><li><p><code><a href="../reference/lwpls.html">lwpls()</a></code> now has the arguments <code>mode</code>, <code>num_comp</code>, <code>localization</code>, <code>neighbors</code> and <code>engine</code>. The <code>shapefactor</code> argument is replaced by <code>localization</code>, the parameter of the similarity function of Kim et al. (2011) (<code>lambda</code> in Kaneko’s implementation). The engine is now <code>"lwpls"</code> (was <code>"rnirs"</code>).</p></li>
 <li><p>The magrittr pipe <code>%&gt;%</code> and <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">generics::tidy()</a></code> are no longer re-exported. Use the native pipe <code>|&gt;</code> (R &gt;= 4.1.0).</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li><p>Native implementation of LW-PLS, validated against Kaneko’s reference implementation. The prediction kernel is written in C++ (RcppArmadillo): it uses the kernel PLS algorithm of Dayal &amp; MacGregor (1997) and processes queries in blocks so that most of the work runs as BLAS matrix-matrix products.</p></li>
 <li><p>Regression with one or more numeric outcomes, and classification (LW-PLS-DA) with class and probability predictions.</p></li>
 <li><p>New <code><a href="../reference/lwpls_fit.html">lwpls_fit()</a></code>, a hardhat-based fitting function with matrix, data frame, formula and recipe interfaces. Its <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> method returns tibbles that follow the tidymodels conventions and can use any number of components.</p></li>
@@ -49,7 +49,7 @@
 <li><p>New dials tuning parameter <code><a href="../reference/localization.html">localization()</a></code>.</p></li>
 <li><p>The optional <code>neighbors</code> argument restricts each local model to the nearest training samples.</p></li>
 <li><p>The <code>"lwpls"</code> engine has a <code>scale</code> argument to switch off the standardization of the data.</p></li>
-<li><p>Added unit tests and an introductory vignette (<code><a href="../articles/lwpls.html">vignette("lwpls")</a></code>).</p></li>
+<li><p>Added unit tests (with test coverage tracked on Codecov) and an introductory vignette (<code><a href="../articles/lwpls.html">vignette("lwpls")</a></code>), including regression and classification examples.</p></li>
 </ul></div>
 </div>
     <div class="section level2">
