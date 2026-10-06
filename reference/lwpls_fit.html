@@ -10,12 +10,16 @@ used on its own through the matrix, data frame, formula or recipe
 interfaces.
 LW-PLS is a lazy learner: fitting validates and standardizes the training
 data and stores it together with the hyperparameters. The local models are
-built at prediction time (see predict.lwpls_fit())."><meta property="og:description" content="lwpls_fit() is the computational engine behind lwpls(). It can also be
+built at prediction time (see predict.lwpls_fit()).
+Sparse (sparsity &amp;gt; 0) and robust (robust = TRUE) local models are
+described in lwpls()."><meta property="og:description" content="lwpls_fit() is the computational engine behind lwpls(). It can also be
 used on its own through the matrix, data frame, formula or recipe
 interfaces.
 LW-PLS is a lazy learner: fitting validates and standardizes the training
 data and stores it together with the hyperparameters. The local models are
-built at prediction time (see predict.lwpls_fit())."><meta property="og:image" content="https://christiangoueguel.com/lwpls/logo.png"></head><body>
+built at prediction time (see predict.lwpls_fit()).
+Sparse (sparsity &amp;gt; 0) and robust (robust = TRUE) local models are
+described in lwpls()."><meta property="og:image" content="https://christiangoueguel.com/lwpls/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -23,7 +27,7 @@ built at prediction time (see predict.lwpls_fit())."><meta property="og:image" c
 
     <a class="navbar-brand me-2" href="../index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +37,10 @@ built at prediction time (see predict.lwpls_fit())."><meta property="og:image" c
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/lwpls.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/robust-sparse.html">Robust and sparse LW-PLS</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -56,6 +64,8 @@ interfaces.</p>
 <p>LW-PLS is a lazy learner: fitting validates and standardizes the training
 data and stores it together with the hyperparameters. The local models are
 built at prediction time (see <code><a href="predict.lwpls_fit.html">predict.lwpls_fit()</a></code>).</p>
+<p>Sparse (<code>sparsity &gt; 0</code>) and robust (<code>robust = TRUE</code>) local models are
+described in <code><a href="lwpls.html">lwpls()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -73,7 +83,12 @@ built at prediction time (see <code><a href="predict.lwpls_fit.html">predict.lwp
 <span>  localization <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  neighbors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  similarity <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>  sparsity <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  robust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  weight_function <span class="op">=</span> <span class="st">"fair"</span>,</span>
+<span>  robust_constant <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_iter <span class="op">=</span> <span class="fl">30L</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -85,7 +100,12 @@ built at prediction time (see <code><a href="predict.lwpls_fit.html">predict.lwp
 <span>  localization <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  neighbors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  similarity <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>  sparsity <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  robust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  weight_function <span class="op">=</span> <span class="st">"fair"</span>,</span>
+<span>  robust_constant <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_iter <span class="op">=</span> <span class="fl">30L</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -97,7 +117,12 @@ built at prediction time (see <code><a href="predict.lwpls_fit.html">predict.lwp
 <span>  localization <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  neighbors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  similarity <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>  sparsity <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  robust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  weight_function <span class="op">=</span> <span class="st">"fair"</span>,</span>
+<span>  robust_constant <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_iter <span class="op">=</span> <span class="fl">30L</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -109,7 +134,12 @@ built at prediction time (see <code><a href="predict.lwpls_fit.html">predict.lwp
 <span>  localization <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  neighbors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  similarity <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>  sparsity <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  robust <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  weight_function <span class="op">=</span> <span class="st">"fair"</span>,</span>
+<span>  robust_constant <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_iter <span class="op">=</span> <span class="fl">30L</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -159,10 +189,38 @@ samples: <code>"euclidean"</code> (default) or <code>"covariance"</code> (covari
 LW-PLS, CbLW-PLS). See <code><a href="lwpls.html">lwpls()</a></code> for details.</p></dd>
 
 
+<dt id="arg-sparsity">sparsity<a class="anchor" aria-label="anchor" href="#arg-sparsity"></a></dt>
+<dd><p>A number in <code>[0, 1)</code>: the sparsity threshold \(\eta\) of
+the local models (Hoffmann et al., 2015). Zero (default) gives ordinary
+local PLS models.</p></dd>
+
+
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
 <dd><p>A logical: should the predictors (and numeric outcomes) be
-standardized to unit variance? Predictors are always mean-centered,
-which does not affect the predictions.</p></dd>
+standardized to unit variance? Predictors are always centered, which
+does not affect the predictions. For robust models, the center and scale
+are the median and the median absolute deviation (MAD).</p></dd>
+
+
+<dt id="arg-robust">robust<a class="anchor" aria-label="anchor" href="#arg-robust"></a></dt>
+<dd><p>A logical: should the local models be robust to outliers
+(partial robust M-regression, Serneels et al., 2005)?</p></dd>
+
+
+<dt id="arg-weight-function">weight_function<a class="anchor" aria-label="anchor" href="#arg-weight-function"></a></dt>
+<dd><p>The weight function of the robust models:
+<code>"fair"</code> (default) or <code>"hampel"</code>.</p></dd>
+
+
+<dt id="arg-robust-constant">robust_constant<a class="anchor" aria-label="anchor" href="#arg-robust-constant"></a></dt>
+<dd><p>The tuning constant(s) of the weight function: for
+<code>"fair"</code>, the constant \(c\) of the Fair function (default 4); for
+<code>"hampel"</code>, three increasing probabilities that define the cutoffs
+(default <code>c(0.95, 0.975, 0.999)</code>). <code>NULL</code> uses the defaults.</p></dd>
+
+
+<dt id="arg-max-iter">max_iter<a class="anchor" aria-label="anchor" href="#arg-max-iter"></a></dt>
+<dd><p>The maximum number of iterations of the robust models.</p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
@@ -233,6 +291,30 @@ the standardization constants and the hyperparameters.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      0.990            0.009<span style="text-decoration: underline;">70</span>           0    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>      0.026<span style="text-decoration: underline;">9</span>           0.502             0.471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>      0.005<span style="text-decoration: underline;">53</span>          0.023<span style="text-decoration: underline;">5</span>            0.971</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Robust and sparse local models</span></span></span>
+<span class="r-in"><span><span class="va">fit4</span> <span class="op">&lt;-</span> <span class="fu">lwpls_fit</span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train</span>, num_comp <span class="op">=</span> <span class="fl">3</span>, robust <span class="op">=</span> <span class="cn">TRUE</span>, sparsity <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit4</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Locally-weighted PLS (regression)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Training samples: 27 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Predictors:       10 (standardized) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Outcomes:         mpg </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Components:       3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Localization:     1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Similarity:       Euclidean </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Neighbors:        all (27) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Sparsity:         0.3 (SNIPLS)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Robust:           PRM, Fair weights (c = 4)</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit4</span>, <span class="va">test</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .pred</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>  20.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>  20.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>  25.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>  18.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>  16.0</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

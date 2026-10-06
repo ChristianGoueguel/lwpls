@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,12 @@
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/lwpls.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/robust-sparse.html">Robust and sparse LW-PLS</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -495,6 +501,13 @@ model with <code><a href="https://parsnip.tidymodels.org/reference/multi_predict
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>        5  49.2</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       10  47.1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       15  47.1</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="robust-and-sparse-local-models">Robust and sparse local models<a class="anchor" aria-label="anchor" href="#robust-and-sparse-local-models"></a>
+</h2>
+<p>The local models can also be made robust to outliers in the training
+data (<code>set_engine("lwpls", robust = TRUE)</code>) and sparse
+(<code>sparsity</code>), see <code><a href="../articles/robust-sparse.html">vignette("robust-sparse")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="engine-arguments">Engine arguments<a class="anchor" aria-label="anchor" href="#engine-arguments"></a>

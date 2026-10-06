@@ -496,6 +496,12 @@ multi_predict(parsnip_fit, head(meats_test), num_comp = c(5, 10, 15))$.pred[[1]]
 #> 3       15  47.1
 ```
 
+## Robust and sparse local models
+
+The local models can also be made robust to outliers in the training
+data (`set_engine("lwpls", robust = TRUE)`) and sparse (`sparsity`), see
+[`vignette("robust-sparse")`](https://christiangoueguel.com/lwpls/articles/robust-sparse.md).
+
 ## Engine arguments
 
 The `"lwpls"` engine standardizes the predictors (and numeric outcomes)

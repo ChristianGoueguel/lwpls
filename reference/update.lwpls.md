@@ -13,6 +13,7 @@ update(
   localization = NULL,
   neighbors = NULL,
   similarity = NULL,
+  sparsity = NULL,
   fresh = FALSE,
   ...
 )
@@ -56,6 +57,12 @@ update(
   The similarity index: `"euclidean"` (engine default) or `"covariance"`
   for covariance-based LW-PLS (CbLW-PLS). See Details and
   [`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md).
+
+- sparsity:
+
+  A number in `[0, 1)`: the sparsity threshold \\\eta\\ of the local
+  models (engine default: 0, no sparsity). See Details and
+  [`sparsity()`](https://christiangoueguel.com/lwpls/reference/sparsity.md).
 
 - fresh:
 

@@ -22,8 +22,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Locally-Weighted Partial Least Squares for tidymodels">
-<meta name="description" content="Locally-weighted partial least squares (LW-PLS) is a just-in-time learning method that builds a dedicated weighted partial least squares model around every new sample, where training samples are weighted by their similarity to that sample (Kim et al. (2011) &lt;doi:10.1016/j.ijpharm.2011.10.007&gt;). Regression (single or multiple outcomes) and classification (locally weighted partial least squares-discriminant analysis; Bevilacqua and Marini (2014) &lt;doi:10.1016/j.aca.2014.05.057&gt;) are supported. The prediction kernel is written in C++ with RcppArmadillo, and the model is integrated with the parsnip, dials and tune packages so it can be used within the tidymodels framework.">
-<meta property="og:description" content="Locally-weighted partial least squares (LW-PLS) is a just-in-time learning method that builds a dedicated weighted partial least squares model around every new sample, where training samples are weighted by their similarity to that sample (Kim et al. (2011) &lt;doi:10.1016/j.ijpharm.2011.10.007&gt;). Regression (single or multiple outcomes) and classification (locally weighted partial least squares-discriminant analysis; Bevilacqua and Marini (2014) &lt;doi:10.1016/j.aca.2014.05.057&gt;) are supported. The prediction kernel is written in C++ with RcppArmadillo, and the model is integrated with the parsnip, dials and tune packages so it can be used within the tidymodels framework.">
+<meta name="description" content="Locally-weighted partial least squares (LW-PLS) is a just-in-time learning method that builds a dedicated weighted partial least squares model around every new sample, where training samples are weighted by their similarity to that sample (Kim et al. (2011) &lt;doi:10.1016/j.ijpharm.2011.10.007&gt;). Regression (single or multiple outcomes) and classification (locally weighted partial least squares-discriminant analysis; Bevilacqua and Marini (2014) &lt;doi:10.1016/j.aca.2014.05.057&gt;) are supported. The local models can be robust to outliers, by partial robust M-regression (Serneels et al. (2005) &lt;doi:10.1016/j.chemolab.2005.04.007&gt;), and sparse (Hoffmann et al. (2015) &lt;doi:10.1016/j.chemolab.2015.09.019&gt;). The prediction kernel is written in C++ with RcppArmadillo, and the model is integrated with the parsnip, dials, tune and yardstick packages so it can be used within the tidymodels framework.">
+<meta property="og:description" content="Locally-weighted partial least squares (LW-PLS) is a just-in-time learning method that builds a dedicated weighted partial least squares model around every new sample, where training samples are weighted by their similarity to that sample (Kim et al. (2011) &lt;doi:10.1016/j.ijpharm.2011.10.007&gt;). Regression (single or multiple outcomes) and classification (locally weighted partial least squares-discriminant analysis; Bevilacqua and Marini (2014) &lt;doi:10.1016/j.aca.2014.05.057&gt;) are supported. The local models can be robust to outliers, by partial robust M-regression (Serneels et al. (2005) &lt;doi:10.1016/j.chemolab.2005.04.007&gt;), and sparse (Hoffmann et al. (2015) &lt;doi:10.1016/j.chemolab.2015.09.019&gt;). The prediction kernel is written in C++ with RcppArmadillo, and the model is integrated with the parsnip, dials, tune and yardstick packages so it can be used within the tidymodels framework.">
 <meta property="og:image" content="https://christiangoueguel.com/lwpls/logo.png">
 </head>
 <body>
@@ -34,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,12 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/lwpls.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/robust-sparse.html">Robust and sparse LW-PLS</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -75,6 +81,8 @@
 <li>
 <code><a href="reference/lwpls.html">lwpls()</a></code>: a <a href="https://parsnip.tidymodels.org" class="external-link">parsnip</a> model for <strong>regression</strong> (one or more outcomes) and <strong>classification</strong> (LW-PLS-DA).</li>
 <li>Two similarity indexes: the Euclidean distance of the original LW-PLS, and the covariance-based index of CbLW-PLS (<code>similarity = "covariance"</code>).</li>
+<li>
+<strong>Robust</strong> local models, by partial robust M-regression (<code>set_engine("lwpls", robust = TRUE)</code>), and <strong>sparse</strong> local models that select their own predictors (<code>sparsity</code>), with the <code><a href="reference/trimmed_rmse.html">trimmed_rmse()</a></code> metric to tune robust models on contaminated data.</li>
 <li>A native implementation, validated against <a href="https://github.com/hkaneko1985/lwpls" class="external-link">Kaneko’s reference implementation</a>, with the prediction kernel written in C++ (<a href="https://cran.r-project.org/package=RcppArmadillo" class="external-link">RcppArmadillo</a>). Queries are processed in blocks, so most of the work runs as BLAS matrix-matrix products.</li>
 <li>Tuning with <a href="https://tune.tidymodels.org" class="external-link">tune</a> and <a href="https://dials.tidymodels.org" class="external-link">dials</a>: <code><a href="reference/localization.html">localization()</a></code> and <code><a href="reference/similarity.html">similarity()</a></code> are tuning parameters, and all values of <code>num_comp</code> are evaluated from a single fit (the “submodel trick”).</li>
 <li>
@@ -134,7 +142,7 @@
 <span><span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;          </span></span>
 <span><span class="co">#&gt; 1 rmse    standard       1.38  pre0_mod0_post0</span></span>
 <span><span class="co">#&gt; 2 rsq     standard       0.978 pre0_mod0_post0</span></span></code></pre></div>
-<p>See <code><a href="articles/lwpls.html">vignette("lwpls")</a></code> for more details, including the comparison with global PLS and classification.</p>
+<p>See <code><a href="articles/lwpls.html">vignette("lwpls")</a></code> for more details, including the comparison with global PLS and classification, and <code><a href="articles/robust-sparse.html">vignette("robust-sparse")</a></code> for robust and sparse local models.</p>
 </div>
 <div class="section level2">
 <h2 id="how-it-works">How it works<a class="anchor" aria-label="anchor" href="#how-it-works"></a>
@@ -152,6 +160,10 @@
 <li>Bevilacqua, M. and Marini, F. (2014). Local classification: Locally weighted-partial least squares-discriminant analysis (LW-PLS-DA). <em>Analytica Chimica Acta</em>, 838, 20–30. <a href="https://doi.org/10.1016/j.aca.2014.05.057" class="external-link">doi:10.1016/j.aca.2014.05.057</a>
 </li>
 <li>Hazama, K. and Kano, M. (2015). Covariance-based locally weighted partial least squares for high-performance adaptive modeling. <em>Chemometrics and Intelligent Laboratory Systems</em>, 146, 55–62. <a href="https://doi.org/10.1016/j.chemolab.2015.05.007" class="external-link">doi:10.1016/j.chemolab.2015.05.007</a>
+</li>
+<li>Serneels, S., Croux, C., Filzmoser, P. and Van Espen, P. J. (2005). Partial robust M-regression. <em>Chemometrics and Intelligent Laboratory Systems</em>, 79(1–2), 55–64. <a href="https://doi.org/10.1016/j.chemolab.2005.04.007" class="external-link">doi:10.1016/j.chemolab.2005.04.007</a>
+</li>
+<li>Hoffmann, I., Serneels, S., Filzmoser, P. and Croux, C. (2015). Sparse partial robust M regression. <em>Chemometrics and Intelligent Laboratory Systems</em>, 149, 50–59. <a href="https://doi.org/10.1016/j.chemolab.2015.09.019" class="external-link">doi:10.1016/j.chemolab.2015.09.019</a>
 </li>
 <li>Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally weighted PLS strategies for regression and discrimination on agronomic NIR data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/10.1002/cem.3209" class="external-link">doi:10.1002/cem.3209</a>
 </li>

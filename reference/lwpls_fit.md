@@ -10,6 +10,10 @@ training data and stores it together with the hyperparameters. The local
 models are built at prediction time (see
 [`predict.lwpls_fit()`](https://christiangoueguel.com/lwpls/reference/predict.lwpls_fit.md)).
 
+Sparse (`sparsity > 0`) and robust (`robust = TRUE`) local models are
+described in
+[`lwpls()`](https://christiangoueguel.com/lwpls/reference/lwpls.md).
+
 ## Usage
 
 ``` r
@@ -26,7 +30,12 @@ lwpls_fit(
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 
@@ -38,7 +47,12 @@ lwpls_fit(
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 
@@ -50,7 +64,12 @@ lwpls_fit(
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 
@@ -62,7 +81,12 @@ lwpls_fit(
   localization = 1,
   neighbors = NULL,
   similarity = "euclidean",
+  sparsity = 0,
   scale = TRUE,
+  robust = FALSE,
+  weight_function = "fair",
+  robust_constant = NULL,
+  max_iter = 30L,
   ...
 )
 ```
@@ -117,11 +141,39 @@ lwpls_fit(
   [`lwpls()`](https://christiangoueguel.com/lwpls/reference/lwpls.md)
   for details.
 
+- sparsity:
+
+  A number in `[0, 1)`: the sparsity threshold \\\eta\\ of the local
+  models (Hoffmann et al., 2015). Zero (default) gives ordinary local
+  PLS models.
+
 - scale:
 
   A logical: should the predictors (and numeric outcomes) be
-  standardized to unit variance? Predictors are always mean-centered,
-  which does not affect the predictions.
+  standardized to unit variance? Predictors are always centered, which
+  does not affect the predictions. For robust models, the center and
+  scale are the median and the median absolute deviation (MAD).
+
+- robust:
+
+  A logical: should the local models be robust to outliers (partial
+  robust M-regression, Serneels et al., 2005)?
+
+- weight_function:
+
+  The weight function of the robust models: `"fair"` (default) or
+  `"hampel"`.
+
+- robust_constant:
+
+  The tuning constant(s) of the weight function: for `"fair"`, the
+  constant \\c\\ of the Fair function (default 4); for `"hampel"`, three
+  increasing probabilities that define the cutoffs (default
+  `c(0.95, 0.975, 0.999)`). `NULL` uses the defaults.
+
+- max_iter:
+
+  The maximum number of iterations of the robust models.
 
 - formula:
 
@@ -192,4 +244,28 @@ predict(fit3, iris[c(1, 51, 101), ], type = "prob")
 #> 1      0.990            0.00970           0    
 #> 2      0.0269           0.502             0.471
 #> 3      0.00553          0.0235            0.971
+
+# Robust and sparse local models
+fit4 <- lwpls_fit(mpg ~ ., data = train, num_comp = 3, robust = TRUE, sparsity = 0.3)
+fit4
+#> Locally-weighted PLS (regression)
+#> 
+#> Training samples: 27 
+#> Predictors:       10 (standardized) 
+#> Outcomes:         mpg 
+#> Components:       3 
+#> Localization:     1 
+#> Similarity:       Euclidean 
+#> Neighbors:        all (27) 
+#> Sparsity:         0.3 (SNIPLS)
+#> Robust:           PRM, Fair weights (c = 4)
+predict(fit4, test)
+#> # A tibble: 5 × 1
+#>   .pred
+#>   <dbl>
+#> 1  20.3
+#> 2  20.7
+#> 3  25.2
+#> 4  18.6
+#> 5  16.0
 ```

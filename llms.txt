@@ -18,6 +18,11 @@ relationships.
 - Two similarity indexes: the Euclidean distance of the original LW-PLS,
   and the covariance-based index of CbLW-PLS
   (`similarity = "covariance"`).
+- **Robust** local models, by partial robust M-regression
+  (`set_engine("lwpls", robust = TRUE)`), and **sparse** local models
+  that select their own predictors (`sparsity`), with the
+  [`trimmed_rmse()`](https://christiangoueguel.com/lwpls/reference/trimmed_rmse.md)
+  metric to tune robust models on contaminated data.
 - A native implementation, validated against [Kaneko’s reference
   implementation](https://github.com/hkaneko1985/lwpls), with the
   prediction kernel written in C++
@@ -102,7 +107,9 @@ lwpls_wflow |>
 See
 [`vignette("lwpls")`](https://christiangoueguel.com/lwpls/articles/lwpls.md)
 for more details, including the comparison with global PLS and
-classification.
+classification, and
+[`vignette("robust-sparse")`](https://christiangoueguel.com/lwpls/articles/robust-sparse.md)
+for robust and sparse local models.
 
 ## How it works
 
@@ -133,6 +140,14 @@ values give global PLS.
   partial least squares for high-performance adaptive modeling.
   *Chemometrics and Intelligent Laboratory Systems*, 146, 55–62.
   [doi:10.1016/j.chemolab.2015.05.007](https://doi.org/10.1016/j.chemolab.2015.05.007)
+- Serneels, S., Croux, C., Filzmoser, P. and Van Espen, P. J. (2005).
+  Partial robust M-regression. *Chemometrics and Intelligent Laboratory
+  Systems*, 79(1–2), 55–64.
+  [doi:10.1016/j.chemolab.2005.04.007](https://doi.org/10.1016/j.chemolab.2005.04.007)
+- Hoffmann, I., Serneels, S., Filzmoser, P. and Croux, C. (2015). Sparse
+  partial robust M regression. *Chemometrics and Intelligent Laboratory
+  Systems*, 149, 50–59.
+  [doi:10.1016/j.chemolab.2015.09.019](https://doi.org/10.1016/j.chemolab.2015.09.019)
 - Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
   weighted PLS strategies for regression and discrimination on agronomic
   NIR data. *Journal of Chemometrics*, 34(5), e3209.
@@ -167,6 +182,16 @@ The computational engine, usable on its own.
 - [`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md)
   [`values_similarity`](https://christiangoueguel.com/lwpls/reference/similarity.md)
   : Similarity index for LW-PLS
+- [`sparsity()`](https://christiangoueguel.com/lwpls/reference/sparsity.md)
+  : Sparsity of the LW-PLS local models
+
+## Metrics
+
+Performance metrics for tuning robust models.
+
+- [`trimmed_rmse()`](https://christiangoueguel.com/lwpls/reference/trimmed_rmse.md)
+  [`trimmed_rmse_vec()`](https://christiangoueguel.com/lwpls/reference/trimmed_rmse.md)
+  : Trimmed root mean squared error
 
 # Articles
 
@@ -174,3 +199,5 @@ The computational engine, usable on its own.
 
 - [Introduction to
   lwpls](https://christiangoueguel.com/lwpls/articles/lwpls.md):
+- [Robust and sparse
+  LW-PLS](https://christiangoueguel.com/lwpls/articles/robust-sparse.md):

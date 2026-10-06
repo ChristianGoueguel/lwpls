@@ -9,9 +9,14 @@ their similarity to that sample (Kim et al. (2011)
 weighted partial least squares-discriminant analysis; Bevilacqua and
 Marini (2014)
 [doi:10.1016/j.aca.2014.05.057](https://doi.org/10.1016/j.aca.2014.05.057)
-) are supported. The prediction kernel is written in C++ with
-'RcppArmadillo', and the model is integrated with the 'parsnip', 'dials'
-and 'tune' packages so it can be used within the 'tidymodels' framework.
+) are supported. The local models can be robust to outliers, by partial
+robust M-regression (Serneels et al. (2005)
+[doi:10.1016/j.chemolab.2005.04.007](https://doi.org/10.1016/j.chemolab.2005.04.007)
+), and sparse (Hoffmann et al. (2015)
+[doi:10.1016/j.chemolab.2015.09.019](https://doi.org/10.1016/j.chemolab.2015.09.019)
+). The prediction kernel is written in C++ with 'RcppArmadillo', and the
+model is integrated with the 'parsnip', 'dials', 'tune' and 'yardstick'
+packages so it can be used within the 'tidymodels' framework.
 
 ## See also
 

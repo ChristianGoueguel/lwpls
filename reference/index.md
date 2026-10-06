@@ -27,3 +27,13 @@ The computational engine, usable on its own.
 - [`similarity()`](https://christiangoueguel.com/lwpls/reference/similarity.md)
   [`values_similarity`](https://christiangoueguel.com/lwpls/reference/similarity.md)
   : Similarity index for LW-PLS
+- [`sparsity()`](https://christiangoueguel.com/lwpls/reference/sparsity.md)
+  : Sparsity of the LW-PLS local models
+
+## Metrics
+
+Performance metrics for tuning robust models.
+
+- [`trimmed_rmse()`](https://christiangoueguel.com/lwpls/reference/trimmed_rmse.md)
+  [`trimmed_rmse_vec()`](https://christiangoueguel.com/lwpls/reference/trimmed_rmse.md)
+  : Trimmed root mean squared error

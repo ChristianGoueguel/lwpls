@@ -13,7 +13,9 @@ training sample is weighted by its similarity to that sample. This lets a
 linear method capture nonlinear and time-varying relationships, which makes
 it popular for soft sensors and spectroscopic calibration.
 The model can be used for regression (one or more numeric outcomes) and
-classification (discriminant analysis on class indicators).
+classification (discriminant analysis on class indicators). The local
+models can also be sparse, so that each one selects its own predictors,
+and robust to outliers in the training data.
 There is a single engine, "lwpls", implemented in this package (C++ via
 RcppArmadillo).'><meta property="og:description" content='lwpls() defines a locally-weighted partial least squares (LW-PLS) model
 for use with the parsnip package. LW-PLS is a
@@ -23,7 +25,9 @@ training sample is weighted by its similarity to that sample. This lets a
 linear method capture nonlinear and time-varying relationships, which makes
 it popular for soft sensors and spectroscopic calibration.
 The model can be used for regression (one or more numeric outcomes) and
-classification (discriminant analysis on class indicators).
+classification (discriminant analysis on class indicators). The local
+models can also be sparse, so that each one selects its own predictors,
+and robust to outliers in the training data.
 There is a single engine, "lwpls", implemented in this package (C++ via
 RcppArmadillo).'><meta property="og:image" content="https://christiangoueguel.com/lwpls/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -33,7 +37,7 @@ RcppArmadillo).'><meta property="og:image" content="https://christiangoueguel.co
 
     <a class="navbar-brand me-2" href="../index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,6 +47,10 @@ RcppArmadillo).'><meta property="og:image" content="https://christiangoueguel.co
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/lwpls.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/robust-sparse.html">Robust and sparse LW-PLS</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -68,7 +76,9 @@ training sample is weighted by its similarity to that sample. This lets a
 linear method capture nonlinear and time-varying relationships, which makes
 it popular for soft sensors and spectroscopic calibration.</p>
 <p>The model can be used for regression (one or more numeric outcomes) and
-classification (discriminant analysis on class indicators).</p>
+classification (discriminant analysis on class indicators). The local
+models can also be sparse, so that each one selects its own predictors,
+and robust to outliers in the training data.</p>
 <p>There is a single engine, <code>"lwpls"</code>, implemented in this package (C++ via
 RcppArmadillo).</p>
     </div>
@@ -81,6 +91,7 @@ RcppArmadillo).</p>
 <span>  localization <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  neighbors <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  similarity <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sparsity <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  engine <span class="op">=</span> <span class="st">"lwpls"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -118,6 +129,12 @@ original LW-PLS algorithm.</p></dd>
 <code><a href="similarity.html">similarity()</a></code>.</p></dd>
 
 
+<dt id="arg-sparsity">sparsity<a class="anchor" aria-label="anchor" href="#arg-sparsity"></a></dt>
+<dd><p>A number in <code>[0, 1)</code>: the sparsity threshold \(\eta\) of
+the local models (engine default: 0, no sparsity). See Details and
+<code><a href="sparsity.html">sparsity()</a></code>.</p></dd>
+
+
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
 <dd><p>A single character string specifying the computational
 engine. Only <code>"lwpls"</code> is available.</p></dd>
@@ -150,7 +167,54 @@ outcomes (or classes), the distance combines the covariance directions of
 all of them. Hazama and Kano write the weights as
 \(\exp(-\phi d_i / \sigma_d)\), so their \(\phi\) is
 <code>1 / localization</code>.</p>
-<p>When <code>neighbors</code> is set, only the <code>neighbors</code> closest training samples
+    </div>
+    <div class="section level2">
+    <h2 id="sparse-local-models">Sparse local models<a class="anchor" aria-label="anchor" href="#sparse-local-models"></a></h2>
+    <p>With <code>sparsity</code> \(\eta &gt; 0\), the local models are fitted by sparse
+NIPALS (SNIPLS; Hoffmann et al., 2015): the weight vector of each component
+is soft-thresholded at \(\eta \max_j |w_j|\), so that the
+predictors with small weights are dropped, and the X loadings are zero
+outside the predictors selected so far. Each local model therefore selects
+its own predictors, such as the wavelengths relevant around the query. For
+several outcomes or classes, the weight vector is the dominant direction of
+the covariance with all of them before thresholding.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="robust-local-models">Robust local models<a class="anchor" aria-label="anchor" href="#robust-local-models"></a></h2>
+    <p>With the engine argument <code>robust = TRUE</code>, each local model is fitted by
+partial robust M-regression (PRM; Serneels et al., 2005), which makes it
+robust to outlying reference values (vertical outliers) and to outlying
+samples in the predictor space (leverage points) among the neighbors of the
+query. Each training sample gets the weight
+$$\omega_i \, w_i^r \, w_i^t,$$
+the product of its similarity weight \(\omega_i\), a weight
+\(w_i^r\) that decreases with its residual in the local model, and a
+weight \(w_i^t\) that decreases with its distance to the center of
+the scores, and the local model is refitted with the new weights until the
+norm of its regression coefficients changes by less than 1%. The weights
+are given by the Fair function
+\(f(z) = 1 / (1 + |z / c|)^2\) (default,
+\(c = 4\)) of the residuals and distances divided by their median, or by
+the Hampel function, which gives zero weight to the most outlying samples,
+with cutoffs at quantiles of the \(\chi\) distribution (Hoffmann et
+al., 2015). As in PRM, the local center of the predictors is their
+L1-median, the intercept is the median of the residuals, and all these
+medians are weighted by the similarity weights, so the model stays local.
+For several outcomes, the residual weights use the norm of the scaled
+residual vectors; for classification, the indicators are centered by their
+(weighted) means so that the predicted indicators still sum to one.</p>
+<p>The robust models also standardize the data by the median and the median
+absolute deviation (MAD), and use the MAD of the distances instead of their
+standard deviation in the similarity weights. With
+<code>similarity = "covariance"</code>, \(\Gamma\) is computed with the
+initial (Fair) weights of PRM.</p>
+<p>The weights depend on the number of components, so a robust model is
+refitted for each value of <code>num_comp</code>: tuning <code>num_comp</code> costs about as
+many robust fits as values in the grid.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="neighbors">Neighbors<a class="anchor" aria-label="anchor" href="#neighbors"></a></h2>
+    <p>When <code>neighbors</code> is set, only the <code>neighbors</code> closest training samples
 receive a non-zero weight and \(\sigma_d\) is computed over their
 distances. This is the "KNN-LW" strategy, which Lesnoff et al. (2020)
 compare with the original LW-PLS that weights all training samples.</p>
@@ -168,15 +232,20 @@ of <code>num_comp</code> from a single model (the "submodel trick").</p>
     </div>
     <div class="section level2">
     <h2 id="engine-details">Engine details<a class="anchor" aria-label="anchor" href="#engine-details"></a></h2>
-    <p>The <code>"lwpls"</code> engine calls <code><a href="lwpls_fit.html">lwpls_fit()</a></code>. It accepts the engine argument
-<code>scale</code> (logical, default <code>TRUE</code>): should the predictors (and numeric
+    <p>The <code>"lwpls"</code> engine calls <code><a href="lwpls_fit.html">lwpls_fit()</a></code>. It accepts the engine arguments:</p><ul><li><p><code>scale</code> (logical, default <code>TRUE</code>): should the predictors (and numeric
 outcomes) be standardized to unit variance? Set it to <code>FALSE</code> for spectra
-and other data measured on a common scale. Predictors with factor columns
-are converted to dummy variables when the model is fitted with a formula.</p>
+and other data measured on a common scale.</p></li>
+<li><p><code>robust</code> (logical, default <code>FALSE</code>): robust local models (see above).</p></li>
+<li><p><code>weight_function</code> (<code>"fair"</code>, the default, or <code>"hampel"</code>),
+<code>robust_constant</code> and <code>max_iter</code> (default 30): the settings of the robust
+models, see <code><a href="lwpls_fit.html">lwpls_fit()</a></code>.</p></li>
+</ul><p>Predictors with factor columns are converted to dummy variables when the
+model is fitted with a formula.</p>
 <p>Tuning parameters:</p><ul><li><p><code>num_comp</code>: <code><a href="https://dials.tidymodels.org/reference/num_comp.html" class="external-link">dials::num_comp()</a></code></p></li>
 <li><p><code>localization</code>: <code><a href="localization.html">localization()</a></code></p></li>
 <li><p><code>neighbors</code>: <code><a href="https://dials.tidymodels.org/reference/neighbors.html" class="external-link">dials::neighbors()</a></code> (default range 10–200)</p></li>
 <li><p><code>similarity</code>: <code><a href="similarity.html">similarity()</a></code></p></li>
+<li><p><code>sparsity</code>: <code><a href="sparsity.html">sparsity()</a></code></p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -191,6 +260,12 @@ weighted-partial least squares-discriminant analysis (LW-PLS-DA).
 least squares for high-performance adaptive modeling. <em>Chemometrics and
 Intelligent Laboratory Systems</em>, 146, 55–62.
 <a href="https://doi.org/10.1016/j.chemolab.2015.05.007" class="external-link">doi:10.1016/j.chemolab.2015.05.007</a></p>
+<p>Serneels, S., Croux, C., Filzmoser, P. and Van Espen, P. J. (2005). Partial
+robust M-regression. <em>Chemometrics and Intelligent Laboratory Systems</em>,
+79(1–2), 55–64. <a href="https://doi.org/10.1016/j.chemolab.2005.04.007" class="external-link">doi:10.1016/j.chemolab.2005.04.007</a></p>
+<p>Hoffmann, I., Serneels, S., Filzmoser, P. and Croux, C. (2015). Sparse
+partial robust M regression. <em>Chemometrics and Intelligent Laboratory
+Systems</em>, 149, 50–59. <a href="https://doi.org/10.1016/j.chemolab.2015.09.019" class="external-link">doi:10.1016/j.chemolab.2015.09.019</a></p>
 <p>Lesnoff, M., Metz, M. and Roger, J.-M. (2020). Comparison of locally
 weighted PLS strategies for regression and discrimination on agronomic NIR
 data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/10.1002/cem.3209" class="external-link">doi:10.1002/cem.3209</a></p>
@@ -198,7 +273,8 @@ data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/1
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="lwpls_fit.html">lwpls_fit()</a></code> for the underlying fitting function,
-<code><a href="multi_predict._lwpls_fit.html">multi_predict._lwpls_fit()</a></code>, <code><a href="localization.html">localization()</a></code>, <code><a href="similarity.html">similarity()</a></code>.</p></div>
+<code><a href="multi_predict._lwpls_fit.html">multi_predict._lwpls_fit()</a></code>, <code><a href="localization.html">localization()</a></code>, <code><a href="similarity.html">similarity()</a></code>,
+<code><a href="sparsity.html">sparsity()</a></code>.</p></div>
     </div>
 
     <div class="section level2">
@@ -243,6 +319,21 @@ data. <em>Journal of Chemometrics</em>, 34(5), e3209. <a href="https://doi.org/1
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>  27.0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>  18.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>  17.4</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Robust and sparse local models</span></span></span>
+<span class="r-in"><span><span class="fu">lwpls</span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">3</span>, sparsity <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_args.html" class="external-link">set_mode</a></span><span class="op">(</span><span class="st">"regression"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"lwpls"</span>, robust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="op">-</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>new_data <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .pred</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>  20.3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>  20.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>  25.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>  18.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>  16.0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Classification</span></span></span>
 <span class="r-in"><span><span class="fu">lwpls</span><span class="op">(</span>num_comp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
