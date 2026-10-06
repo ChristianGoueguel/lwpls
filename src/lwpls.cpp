@@ -204,9 +204,11 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
           arma::vec eig_val;
           arma::mat eig_vec;
           if (!arma::eig_sym(eig_val, eig_vec, xy_j.t() * xy_j)) {
+            // # nocov start
+            // Defensive: the matrix is a small symmetric PSD matrix.
             active[j] = 0;
             continue;
-          }
+          }  // # nocov end
           w_a = xy_j * eig_vec.col(q - 1);
           w_a /= arma::norm(w_a);
         }
@@ -228,8 +230,11 @@ arma::cube lwpls_predict_cpp(const arma::mat& x, const arma::mat& y,
             z.col(j) = w.col(j) % t.col(j);
             tt[j] = arma::dot(z.col(j), t.col(j));
             if (!(tt[j] > tol * ss_x[j]) || !std::isfinite(tt[j])) {
+              // # nocov start
+              // Defensive: exhausted predictors are normally caught by the
+              // cross-product check above.
               active[j] = 0;
-            }
+            }  // # nocov end
           }
           if (!active[j]) z.col(j).zeros();
         }

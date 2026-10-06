@@ -118,9 +118,6 @@ Kim, S., Kano, M., Nakagawa, H. and Hasebe, S. (2011). Estimation of active
 pharmaceutical ingredients content using locally weighted partial least
 squares and statistical wavelength selection. \emph{International Journal of
 Pharmaceutics}, 421(2), 269--274. \doi{10.1016/j.ijpharm.2011.10.007}
-
-Kaneko, H. Locally-weighted partial least squares (LWPLS).
-\url{https://datachemeng.com/locallyweightedpartialleastsquares/}
 }
 \seealso{
 \code{\link[=lwpls_fit]{lwpls_fit()}} for the underlying fitting function,

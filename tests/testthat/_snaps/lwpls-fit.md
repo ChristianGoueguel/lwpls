@@ -34,6 +34,20 @@
       Localization:     1 
       Neighbors:        all (150) 
 
+---
+
+    Code
+      lwpls_fit(y + y2 ~ ., data = train, num_comp = 2)
+    Output
+      Locally-weighted PLS (regression)
+      
+      Training samples: 90 
+      Predictors:       6 (standardized) 
+      Outcomes:         y, y2 
+      Components:       2 
+      Localization:     1 
+      Neighbors:        all (90) 
+
 # bad hyperparameters are rejected
 
     Code
@@ -65,6 +79,14 @@
     Condition
       Error in `lwpls_fit()`:
       ! `localization` must be a single positive number, not Inf.
+
+---
+
+    Code
+      lwpls_fit(x, y, localization = "small")
+    Condition
+      Error in `lwpls_fit()`:
+      ! `localization` must be a single positive number, not a string.
 
 ---
 
@@ -138,6 +160,14 @@
 ---
 
     Code
+      lwpls_fit(x[0], y)
+    Condition
+      Error in `lwpls_fit()`:
+      ! At least one predictor is required.
+
+---
+
+    Code
       lwpls_fit(x_na, y)
     Condition
       Error in `lwpls_fit()`:
@@ -150,6 +180,14 @@
     Condition
       Error in `lwpls_fit()`:
       ! The outcome contains missing or infinite values.
+
+---
+
+    Code
+      lwpls_fit(x, factor(ifelse(y_na > 1, "a", "b")))
+    Condition
+      Error in `lwpls_fit()`:
+      ! The outcome contains missing values.
 
 ---
 

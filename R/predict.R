@@ -92,9 +92,6 @@ multi_predict._lwpls_fit <- function(object,
                                      type = NULL,
                                      num_comp = NULL,
                                      ...) {
-  if (any(names(rlang::enquos(...)) == "newdata")) {
-    cli::cli_abort("Did you mean to use {.arg new_data} instead of {.arg newdata}?")
-  }
   rlang::check_dots_empty()
 
   fit <- object$fit

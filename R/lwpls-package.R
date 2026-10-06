@@ -13,9 +13,11 @@ NULL
 # The model is registered in parsnip's model environment when the package is
 # loaded. The check avoids re-registering it when the namespace is reloaded
 # (e.g. by `devtools::load_all()`).
+# nocov start
 .onLoad <- function(libname, pkgname) {
   current <- parsnip::get_model_env()
   if (!any(current$models == "lwpls")) {
     make_lwpls()
   }
 }
+# nocov end

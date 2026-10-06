@@ -1,6 +1,7 @@
 # Registration of the `lwpls` model and its `"lwpls"` engine in parsnip's
-# model environment. Called from `.onLoad()`.
+# model environment. Called from `.onLoad()`, i.e. before covr can trace it.
 
+# nocov start
 make_lwpls <- function() {
   parsnip::set_new_model("lwpls")
 
@@ -103,3 +104,4 @@ lwpls_pred_value <- function(type) {
     )
   )
 }
+# nocov end

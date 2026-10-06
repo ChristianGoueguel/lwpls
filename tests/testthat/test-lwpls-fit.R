@@ -206,6 +206,10 @@ test_that("missing values in new data give missing predictions", {
   expect_true(is.na(pred$.pred[2]))
   expect_equal(pred$.pred[-2], predict(fit, new[-2, ])$.pred)
 
+  all_missing <- new
+  all_missing$x1 <- NA_real_
+  expect_equal(predict(fit, all_missing)$.pred, rep(NA_real_, 4))
+
   fit_cls <- lwpls_fit(iris[1:4], iris$Species)
   new_cls <- iris[c(1, 51), 1:4]
   new_cls$Sepal.Width[1] <- NA
@@ -216,6 +220,7 @@ test_that("missing values in new data give missing predictions", {
 test_that("print method", {
   expect_snapshot(lwpls_fit(train[x_names], train$y, num_comp = 2, neighbors = 50))
   expect_snapshot(lwpls_fit(Species ~ ., data = iris, scale = FALSE))
+  expect_snapshot(lwpls_fit(y + y2 ~ ., data = train, num_comp = 2))
 })
 
 # Input validation ------------------------------------------------------------
@@ -227,6 +232,7 @@ test_that("bad hyperparameters are rejected", {
   expect_snapshot(error = TRUE, lwpls_fit(x, y, num_comp = 1.5))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, localization = -1))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, localization = Inf))
+  expect_snapshot(error = TRUE, lwpls_fit(x, y, localization = "small"))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, neighbors = 0))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, scale = "yes"))
   expect_snapshot(error = TRUE, lwpls_fit(x, y, num_comps = 2))
@@ -241,6 +247,7 @@ test_that("bad data are rejected", {
   expect_snapshot(error = TRUE, lwpls_fit(matrix(rnorm(20), 10), y[1:10]))
   expect_snapshot(error = TRUE, lwpls_fit(iris[5:4], iris$Sepal.Length))
   expect_snapshot(error = TRUE, lwpls_fit(x[1, ], y[1]))
+  expect_snapshot(error = TRUE, lwpls_fit(x[0], y))
 
   x_na <- x
   x_na$x1[3] <- NA
@@ -248,6 +255,7 @@ test_that("bad data are rejected", {
   y_na <- y
   y_na[3] <- NA
   expect_snapshot(error = TRUE, lwpls_fit(x, y_na))
+  expect_snapshot(error = TRUE, lwpls_fit(x, factor(ifelse(y_na > 1, "a", "b"))))
   expect_snapshot(error = TRUE, lwpls_fit(x, as.character(y > 1)))
   expect_snapshot(error = TRUE, lwpls_fit(x, factor(rep("a", nrow(x)))))
   expect_snapshot(
