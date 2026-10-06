@@ -33,18 +33,16 @@ library(ggplot2)
 
 ## The algorithm
 
-For a query sample $`x_q`$, the similarity weight of the training sample
-$`x_i`$ is
+For a query sample \\x_q\\, the similarity weight of the training sample
+\\x_i\\ is
 
-``` math
-\omega_i = \exp\left(-\frac{d_i}{\sigma_d \, \varphi}\right), \qquad
-d_i = \lVert x_i - x_q \rVert,
-```
+\\ \omega_i = \exp\left(-\frac{d_i}{\sigma_d \\ \varphi}\right), \qquad
+d_i = \lVert x_i - x_q \rVert, \\
 
-where $`\sigma_d`$ is the standard deviation of the distances $`d_i`$
-and $`\varphi > 0`$ is the **localization** parameter. The training data
-are centered with the weighted means, a PLS model with `num_comp`
-components is fitted using the weights $`\omega_i`$, and the query is
+where \\\sigma_d\\ is the standard deviation of the distances \\d_i\\
+and \\\varphi \> 0\\ is the **localization** parameter. The training
+data are centered with the weighted means, a PLS model with `num_comp`
+components is fitted using the weights \\\omega_i\\, and the query is
 projected onto that local model to get its prediction.
 
 The two main hyperparameters are therefore:
@@ -57,7 +55,7 @@ The two main hyperparameters are therefore:
 Optionally, `neighbors` restricts each local model to the nearest
 training samples (the “KNN-LW” strategy compared with the original
 LW-PLS by Lesnoff et al., 2020), and `similarity` changes how the
-distances $`d_i`$ are measured (see [Similarity
+distances \\d_i\\ are measured (see [Similarity
 indexes](#similarity-indexes)).
 
 ## Regression: fat-free water content of meat from NIR spectra
@@ -210,13 +208,10 @@ By default, the similarity between two samples is based on the Euclidean
 distance between their (standardized) predictors, so every predictor
 counts equally, whether or not it is related to the outcome.
 Covariance-based LW-PLS (CbLW-PLS; Hazama and Kano, 2015) measures the
-distances along the covariance direction
-$`\Gamma = X^\top y / \lVert X^\top y \rVert`$ of the training data
-instead,
+distances along the covariance direction \\\Gamma = X^\top y / \lVert
+X^\top y \rVert\\ of the training data instead,
 
-``` math
-d_i = \lVert \Gamma^\top (x_i - x_q) \rVert,
-```
+\\ d_i = \lVert \Gamma^\top (x_i - x_q) \rVert, \\
 
 so that the predictors related to the outcome drive the similarity. Use
 `similarity = "covariance"` to select it. Since the best index depends
@@ -268,8 +263,8 @@ applications, so it is worth including in the tuning grid.
 For a factor outcome, LW-PLS models the class indicators: this is
 locally weighted partial least squares-discriminant analysis (LW-PLS-DA,
 Bevilacqua and Marini, 2014). The predicted class is the one with the
-largest predicted indicator, and the indicators, truncated to
-$`[0, 1]`$, give the class probabilities.
+largest predicted indicator, and the indicators, truncated to \\\[0,
+1\]\\, give the class probabilities.
 
 Because every local model is linear but fitted around its own query,
 LW-PLS-DA can follow curved class boundaries that a global PLS-DA model

@@ -6,7 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Locally-Weighted Partial Least Squares for tidymodels • lwpls</title>
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -128,9 +134,9 @@
 <div class="section level2">
 <h2 id="how-it-works">How it works<a class="anchor" aria-label="anchor" href="#how-it-works"></a>
 </h2>
-<p>For a query sample <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>q</mi></msub><annotation encoding="application/x-tex">x_q</annotation></semantics></math>, each training sample <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math> receives the weight</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ω</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>−</mi><mfrac><mrow><mo stretchy="true" form="prefix">‖</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>x</mi><mi>q</mi></msub><mo stretchy="true" form="postfix">‖</mo></mrow><mrow><msub><mi>σ</mi><mi>d</mi></msub><mspace width="0.167em"></mspace><mi>φ</mi></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\omega_i = \exp\left(-\frac{\lVert x_i - x_q \rVert}{\sigma_d \, \varphi}\right)</annotation></semantics></math></p>
-<p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>d</mi></msub><annotation encoding="application/x-tex">\sigma_d</annotation></semantics></math> is the standard deviation of the distances and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>φ</mi><annotation encoding="application/x-tex">\varphi</annotation></semantics></math> is the <code>localization</code> parameter. A PLS model with <code>num_comp</code> components is then fitted with these weights, and the query is projected onto it. Small values of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>φ</mi><annotation encoding="application/x-tex">\varphi</annotation></semantics></math> give very local models; large values give global PLS.</p>
+<p>For a query sample <span class="math inline">\(x_q\)</span>, each training sample <span class="math inline">\(x_i\)</span> receives the weight</p>
+<p><span class="math display">\[\omega_i = \exp\left(-\frac{\lVert x_i - x_q \rVert}{\sigma_d \varphi}\right)\]</span></p>
+<p>where <span class="math inline">\(\sigma_d\)</span> is the standard deviation of the distances and <span class="math inline">\(\varphi\)</span> is the <code>localization</code> parameter. A PLS model with <code>num_comp</code> components is then fitted with these weights, and the query is projected onto it. Small values of <span class="math inline">\(\varphi\)</span> give very local models; large values give global PLS.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

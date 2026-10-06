@@ -6,7 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Introduction to lwpls • lwpls</title>
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -53,7 +59,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Introduction to lwpls</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ChristianGoueguel/lwpls/blob/0.2.0/vignettes/lwpls.Rmd" class="external-link"><code>vignettes/lwpls.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ChristianGoueguel/lwpls/blob/master/vignettes/lwpls.Rmd" class="external-link"><code>vignettes/lwpls.Rmd</code></a></small>
       <div class="d-none name"><code>lwpls.Rmd</code></div>
     </div>
 
@@ -90,27 +96,19 @@ of <code>num_comp</code> from a single model fit.</li>
 <div class="section level2">
 <h2 id="the-algorithm">The algorithm<a class="anchor" aria-label="anchor" href="#the-algorithm"></a>
 </h2>
-<p>For a query sample
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>q</mi></msub><annotation encoding="application/x-tex">x_q</annotation></semantics></math>,
-the similarity weight of the training sample
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math>
-is</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ω</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>−</mi><mfrac><msub><mi>d</mi><mi>i</mi></msub><mrow><msub><mi>σ</mi><mi>d</mi></msub><mspace width="0.167em"></mspace><mi>φ</mi></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">‖</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>x</mi><mi>q</mi></msub><mo stretchy="true" form="postfix">‖</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p>For a query sample <span class="math inline">\(x_q\)</span>, the
+similarity weight of the training sample <span class="math inline">\(x_i\)</span> is</p>
+<p><span class="math display">\[
 \omega_i = \exp\left(-\frac{d_i}{\sigma_d \, \varphi}\right), \qquad
 d_i = \lVert x_i - x_q \rVert,
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>d</mi></msub><annotation encoding="application/x-tex">\sigma_d</annotation></semantics></math>
-is the standard deviation of the distances
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mi>i</mi></msub><annotation encoding="application/x-tex">d_i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>φ</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\varphi &gt; 0</annotation></semantics></math>
-is the <strong>localization</strong> parameter. The training data are
-centered with the weighted means, a PLS model with <code>num_comp</code>
-components is fitted using the weights
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ω</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\omega_i</annotation></semantics></math>,
-and the query is projected onto that local model to get its
-prediction.</p>
+\]</span></p>
+<p>where <span class="math inline">\(\sigma_d\)</span> is the standard
+deviation of the distances <span class="math inline">\(d_i\)</span> and
+<span class="math inline">\(\varphi &gt; 0\)</span> is the
+<strong>localization</strong> parameter. The training data are centered
+with the weighted means, a PLS model with <code>num_comp</code>
+components is fitted using the weights <span class="math inline">\(\omega_i\)</span>, and the query is projected onto
+that local model to get its prediction.</p>
 <p>The two main hyperparameters are therefore:</p>
 <ul>
 <li>
@@ -124,10 +122,8 @@ similar, so LW-PLS tends to a global PLS model.</li>
 <p>Optionally, <code>neighbors</code> restricts each local model to the
 nearest training samples (the “KNN-LW” strategy compared with the
 original LW-PLS by Lesnoff et al., 2020), and <code>similarity</code>
-changes how the distances
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mi>i</mi></msub><annotation encoding="application/x-tex">d_i</annotation></semantics></math>
-are measured (see <a href="#similarity-indexes">Similarity
-indexes</a>).</p>
+changes how the distances <span class="math inline">\(d_i\)</span> are
+measured (see <a href="#similarity-indexes">Similarity indexes</a>).</p>
 </div>
 <div class="section level2">
 <h2 id="regression-fat-free-water-content-of-meat-from-nir-spectra">Regression: fat-free water content of meat from NIR spectra<a class="anchor" aria-label="anchor" href="#regression-fat-free-water-content-of-meat-from-nir-spectra"></a>
@@ -259,12 +255,11 @@ baseline:</p>
 Euclidean distance between their (standardized) predictors, so every
 predictor counts equally, whether or not it is related to the outcome.
 Covariance-based LW-PLS (CbLW-PLS; Hazama and Kano, 2015) measures the
-distances along the covariance direction
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Γ</mi><mo>=</mo><msup><mi>X</mi><mi>⊤</mi></msup><mi>y</mi><mi>/</mi><mrow><mo stretchy="true" form="prefix">‖</mo><msup><mi>X</mi><mi>⊤</mi></msup><mi>y</mi><mo stretchy="true" form="postfix">‖</mo></mrow></mrow><annotation encoding="application/x-tex">\Gamma = X^\top y / \lVert X^\top y \rVert</annotation></semantics></math>
-of the training data instead,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">‖</mo><msup><mi mathvariant="normal">Γ</mi><mi>⊤</mi></msup><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><msub><mi>x</mi><mi>q</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">‖</mo></mrow><mo>,</mo></mrow><annotation encoding="application/x-tex">
+distances along the covariance direction <span class="math inline">\(\Gamma = X^\top y / \lVert X^\top y
+\rVert\)</span> of the training data instead,</p>
+<p><span class="math display">\[
 d_i = \lVert \Gamma^\top (x_i - x_q) \rVert,
-</annotation></semantics></math></p>
+\]</span></p>
 <p>so that the predictors related to the outcome drive the similarity.
 Use <code>similarity = "covariance"</code> to select it. Since the best
 index depends on the data, it can be tuned together with the other
@@ -313,9 +308,7 @@ applications, so it is worth including in the tuning grid.</p>
 <p>For a factor outcome, LW-PLS models the class indicators: this is
 locally weighted partial least squares-discriminant analysis (LW-PLS-DA,
 Bevilacqua and Marini, 2014). The predicted class is the one with the
-largest predicted indicator, and the indicators, truncated to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>,
-give the class probabilities.</p>
+largest predicted indicator, and the indicators, truncated to <span class="math inline">\([0, 1]\)</span>, give the class probabilities.</p>
 <p>Because every local model is linear but fitted around its own query,
 LW-PLS-DA can follow curved class boundaries that a global PLS-DA model
 cannot. The <code>parabolic</code> data from modeldata illustrate this:
