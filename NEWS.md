@@ -1,4 +1,4 @@
-# lwpls (development version)
+# lwpls 0.2.1
 
 ## New features
 

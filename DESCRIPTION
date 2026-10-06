@@ -1,7 +1,7 @@
 Package: lwpls
 Type: Package
 Title: Locally-Weighted Partial Least Squares for 'tidymodels'
-Version: 0.2.0.9000
+Version: 0.2.1
 Authors@R: 
     person("Christian L.", "Goueguel", , "christian.goueguel@gmail.com", role = c("aut", "cre"))
 Description: Locally-weighted partial least squares (LW-PLS) is a
