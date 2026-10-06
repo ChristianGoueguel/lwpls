@@ -7,7 +7,7 @@
 #' * `"euclidean"`: the Euclidean distance between the (standardized)
 #'   predictors, as in the original LW-PLS.
 #' * `"covariance"`: the distance after projecting the samples on the
-#'   covariance direction \eqn{\Gamma = X^\top Y / \lVert X^\top Y \rVert}
+#'   covariance direction \eqn{\Gamma = X^\top Y / \lVert X^\top Y \rVert}{Gamma = X'Y / ||X'Y||}
 #'   (covariance-based LW-PLS, CbLW-PLS; Hazama and Kano, 2015). It accounts
 #'   for the relationships among the predictors and between the predictors and
 #'   the outcome(s).

@@ -59,25 +59,25 @@ RcppArmadillo).
 For a query sample \eqn{x_q}, the similarity weight of the training sample
 \eqn{x_i} is
 
-\deqn{\omega_i = \exp\left(-\frac{d_i}{\sigma_d \, \varphi}\right),}
+\deqn{\omega_i = \exp\left(-\frac{d_i}{\sigma_d \, \varphi}\right),}{w_i = exp(-d_i / (sigma_d * phi)),}
 
-where \eqn{d_i = \lVert x_i - x_q \rVert} is the Euclidean distance (on
+where \eqn{d_i = \lVert x_i - x_q \rVert}{d_i = ||x_i - x_q||} is the Euclidean distance (on
 standardized predictors by default), \eqn{\sigma_d} is the standard
-deviation of the distances and \eqn{\varphi} is the \code{localization}
+deviation of the distances and \eqn{\varphi}{phi} is the \code{localization}
 parameter (\eqn{\lambda} in Kaneko's implementation). A weighted PLS model
 is then fitted with weighted centering, weighted covariances and the
 query is projected onto its local latent space to obtain the prediction.
 
 With \code{similarity = "covariance"}, the distances are computed after
 projecting the samples on the covariance direction
-\eqn{\Gamma = X^\top Y / \lVert X^\top Y \rVert} of the training data,
-\eqn{d_i = \lVert \Gamma^\top (x_i - x_q) \rVert}. This covariance-based
+\eqn{\Gamma = X^\top Y / \lVert X^\top Y \rVert}{Gamma = X'Y / ||X'Y||} of the training data,
+\eqn{d_i = \lVert \Gamma^\top (x_i - x_q) \rVert}{d_i = ||Gamma'(x_i - x_q)||}. This covariance-based
 LW-PLS (CbLW-PLS; Hazama and Kano, 2015) accounts for the relationships
 among the predictors and between the predictors and the outcome(s). For a
 single outcome, \eqn{\Gamma} is the first PLS weight vector; for several
 outcomes (or classes), the distance combines the covariance directions of
 all of them. Hazama and Kano write the weights as
-\eqn{\exp(-\phi d_i / \sigma_d)}, so their \eqn{\phi} is
+\eqn{\exp(-\phi d_i / \sigma_d)}{exp(-phi d_i / sigma_d)}, so their \eqn{\phi} is
 \code{1 / localization}.
 
 When \code{neighbors} is set, only the \code{neighbors} closest training samples

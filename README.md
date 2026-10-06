@@ -112,7 +112,7 @@ global PLS and classification.
 
 For a query sample $x_q$, each training sample $x_i$ receives the weight
 
-$$\omega_i = \exp\left(-\frac{\lVert x_i - x_q \rVert}{\sigma_d \, \varphi}\right)$$
+$$\omega_i = \exp\left(-\frac{\lVert x_i - x_q \rVert}{\sigma_d \varphi}\right)$$
 
 where $\sigma_d$ is the standard deviation of the distances and
 $\varphi$ is the `localization` parameter. A PLS model with `num_comp`

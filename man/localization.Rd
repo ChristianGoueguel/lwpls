@@ -26,7 +26,7 @@ give very local models; large values give all training samples similar
 weights, so that the model tends to a global PLS model.
 }
 \details{
-The default range, \eqn{2^{-9}} to \eqn{2^{5}} on a log-2 scale, follows
+The default range, \eqn{2^{-9}}{2^-9} to \eqn{2^{5}}{2^5} on a log-2 scale, follows
 the candidate values used by Kaneko for the LW-PLS hyperparameter search.
 }
 \examples{
