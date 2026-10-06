@@ -8,8 +8,8 @@ no longer depends on the archived rnirs package.
 ### Breaking changes
 
 - [`lwpls()`](https://christiangoueguel.com/lwpls/reference/lwpls.md)
-  now has the arguments `mode`, `num_comp`, `localization`, `neighbors`,
-  `similarity` and `engine`. The `shapefactor` argument is replaced by
+  now has the arguments `mode`, `num_comp`, `localization`, `neighbors`
+  and `engine`. The `shapefactor` argument is replaced by
   `localization`, the parameter of the similarity function of Kim et
   al. (2011) (`lambda` in Kaneko’s implementation). The engine is now
   `"lwpls"` (was `"rnirs"`).

@@ -29,7 +29,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/ChristianGoueguel/lwpls/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/ChristianGoueguel/lwpls/blob/0.2.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
@@ -37,7 +37,7 @@
 <p>This is a rewrite of the package. LW-PLS is now implemented natively and no longer depends on the archived rnirs package.</p>
 <div class="section level3">
 <h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
-<ul><li><p><code><a href="../reference/lwpls.html">lwpls()</a></code> now has the arguments <code>mode</code>, <code>num_comp</code>, <code>localization</code>, <code>neighbors</code>, <code>similarity</code> and <code>engine</code>. The <code>shapefactor</code> argument is replaced by <code>localization</code>, the parameter of the similarity function of Kim et al. (2011) (<code>lambda</code> in Kaneko’s implementation). The engine is now <code>"lwpls"</code> (was <code>"rnirs"</code>).</p></li>
+<ul><li><p><code><a href="../reference/lwpls.html">lwpls()</a></code> now has the arguments <code>mode</code>, <code>num_comp</code>, <code>localization</code>, <code>neighbors</code> and <code>engine</code>. The <code>shapefactor</code> argument is replaced by <code>localization</code>, the parameter of the similarity function of Kim et al. (2011) (<code>lambda</code> in Kaneko’s implementation). The engine is now <code>"lwpls"</code> (was <code>"rnirs"</code>).</p></li>
 <li><p>The magrittr pipe <code>%&gt;%</code> and <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">generics::tidy()</a></code> are no longer re-exported. Use the native pipe <code>|&gt;</code> (R &gt;= 4.1.0).</p></li>
 </ul></div>
 <div class="section level3">
