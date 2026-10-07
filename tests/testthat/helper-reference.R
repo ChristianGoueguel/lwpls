@@ -1,5 +1,6 @@
 # Direct R transcription of `lwpls()` from https://github.com/hkaneko1985/lwpls
-# (NIPALS with explicit deflation). `x_train`, `y_train` and `x_test` must be
+# (Copyright (c) 2018 Hiromasa Kaneko, MIT License) (NIPALS with explicit
+# deflation). `x_train`, `y_train` and `x_test` must be
 # autoscaled with the training statistics. Returns an
 # nrow(x_test) x max_component_number matrix of predictions.
 #
