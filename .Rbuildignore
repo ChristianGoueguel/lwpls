@@ -8,3 +8,5 @@
 ^README\.Rmd$
 ^data-raw$
 ^codecov\.yml$
+^cran-comments\.md$
+^CRAN-SUBMISSION$

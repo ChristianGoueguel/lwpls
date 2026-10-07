@@ -1,9 +1,12 @@
 Package: lwpls
 Type: Package
 Title: Locally-Weighted Partial Least Squares for 'tidymodels'
-Version: 0.2.1.9000
-Authors@R: 
-    person("Christian L.", "Goueguel", , "christian.goueguel@gmail.com", role = c("aut", "cre"))
+Version: 0.3.0
+Authors@R: c(
+    person("Christian L.", "Goueguel", , "christian.goueguel@gmail.com", role = c("aut", "cre")),
+    person("Hiromasa", "Kaneko", role = "cph",
+           comment = "reference LW-PLS implementation transcribed in the tests")
+  )
 Description: Locally-weighted partial least squares (LW-PLS) is a
     just-in-time learning method that builds a dedicated weighted partial
     least squares model around every new sample, where training samples
