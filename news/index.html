@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lwpls</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,15 +45,16 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="lwpls-development-version">lwpls (development version)<a class="anchor" aria-label="anchor" href="#lwpls-development-version"></a></h2>
-<div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<h2 class="pkg-version" data-toc-text="0.3.0" id="lwpls-030">lwpls 0.3.0<a class="anchor" aria-label="anchor" href="#lwpls-030"></a></h2>
+<ul><li>First CRAN release.</li>
+</ul><div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
 <ul><li><p>New <code><a href="../reference/lwpls_local.html">lwpls_local()</a></code> returns the local models that LW-PLS builds for new samples, with their diagnostics: the reliability of each prediction (effective number of neighbors, distance to the nearest training sample, and the Hotelling T² and Q statistics of the query in its local model, compared with empirical limits, theoretical limits and as percentile ranks among the training samples of the local model), the regression coefficients and VIP of each local model, the predictors selected by sparse models, and the robust weights of the training samples. It accepts <code><a href="../reference/lwpls_fit.html">lwpls_fit()</a></code> objects, parsnip fits and workflows.</p></li>
 <li><p>New ggplot2 plots of the local models, also available with <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>: <code><a href="../reference/lwpls_plots.html">plot_reliability()</a></code> (applicability domain of the predictions), <code><a href="../reference/lwpls_plots.html">plot_coefficients()</a></code> (local regression vectors or VIP along the spectrum, as lines or a heatmap), <code><a href="../reference/lwpls_plots.html">plot_robust_weights()</a></code> (training samples down-weighted by robust models, such as wrong reference values) and <code><a href="../reference/lwpls_plots.html">plot_selection()</a></code> (wavelengths selected by sparse models, per component or overall). The spectral axis is read from the predictor names or given as <code>wavelength</code>.</p></li>
 <li><p>New vignette, <code><a href="../articles/diagnostics.html">vignette("diagnostics")</a></code>.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-development-version">Documentation<a class="anchor" aria-label="anchor" href="#documentation-development-version"></a></h3>
+<h3 id="documentation-0-3-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-3-0"></a></h3>
 <ul><li><p>The README and <code><a href="../articles/lwpls.html">vignette("lwpls")</a></code> show the cross-validated RMSE as a 3D surface over <code>num_comp</code> and <code>localization</code> (interactive on the package website, with plotly as a new suggested package).</p></li>
 <li><p>New vignette, <code><a href="../articles/similarity.html">vignette("similarity")</a></code>, on choosing a similarity index: the geometry of the Euclidean and covariance-based distances, and simulations showing when each one works best.</p></li>
 </ul></div>
