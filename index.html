@@ -96,22 +96,29 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Install the development version from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>Install a prebuilt binary from <a href="https://christiangoueguel.r-universe.dev/lwpls" class="external-link">r-universe</a>, which needs no compiler:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"lwpls"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://christiangoueguel.r-universe.dev"</span>, <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Or build the development version from <a href="https://github.com/ChristianGoueguel/lwpls" class="external-link">GitHub</a> with:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"ChristianGoueguel/lwpls"</span><span class="op">)</span></span></code></pre></div>
+<p>Building from source compiles C++ code, so it needs the R compiler tools. On macOS, that includes gfortran from <a href="https://mac.r-project.org/tools/" class="external-link uri">https://mac.r-project.org/tools/</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>Predict the water content of meat samples from their near-infrared spectra and tune both hyperparameters with cross-validation:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidymodels.tidymodels.org" class="external-link">tidymodels</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ChristianGoueguel/lwpls" class="external-link">lwpls</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">meats</span>, package <span class="op">=</span> <span class="st">"modeldata"</span><span class="op">)</span></span>
 <span><span class="va">meats</span> <span class="op">&lt;-</span> <span class="va">meats</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">fat</span>, <span class="op">-</span><span class="va">protein</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">meats_split</span> <span class="op">&lt;-</span> <span class="fu">initial_split</span><span class="op">(</span><span class="va">meats</span>, prop <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
 <span><span class="va">meats_folds</span> <span class="op">&lt;-</span> <span class="fu">vfold_cv</span><span class="op">(</span><span class="fu">training</span><span class="op">(</span><span class="va">meats_split</span><span class="op">)</span>, v <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -132,7 +139,7 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">lwpls_res</span> <span class="op">&lt;-</span> <span class="fu">tune_grid</span><span class="op">(</span><span class="va">lwpls_wflow</span>, <span class="va">meats_folds</span>, grid <span class="op">=</span> <span class="va">lwpls_grid</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">show_best</span><span class="op">(</span><span class="va">lwpls_res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 3 × 8</span></span>
 <span><span class="co">#&gt;   num_comp localization .metric .estimator  mean     n std_err .config          </span></span>
@@ -141,13 +148,13 @@
 <span><span class="co">#&gt; 2       13          0.5 rmse    standard    1.68     5   0.198 pre0_mod101_post0</span></span>
 <span><span class="co">#&gt; 3        9          0.5 rmse    standard    1.70     5   0.174 pre0_mod069_post0</span></span></code></pre></div>
 <p>The 120 candidate models are evaluated with only 8 fits per resample. Their cross-validated RMSE forms a surface over the two hyperparameters, with a valley between very local models and global PLS (the best model is the orange point):</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rmse_grid</span> <span class="op">&lt;-</span> <span class="va">lwpls_res</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">collect_metrics</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.metric</span> <span class="op">==</span> <span class="st">"rmse"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">num_comp</span>, <span class="va">localization</span>, rmse <span class="op">=</span> <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">best</span> <span class="op">&lt;-</span> <span class="fu">slice_min</span><span class="op">(</span><span class="va">rmse_grid</span>, <span class="va">rmse</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># color each facet by its mean RMSE</span></span>
 <span><span class="va">rmse_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">rmse_grid</span>, <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">rmse</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">num_comp</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">localization</span><span class="op">)</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">rmse_mat</span><span class="op">)</span></span>
@@ -179,7 +186,7 @@
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-4-1.png" alt="" width="100%"></p>
 <p>The final model is evaluated on the test set:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lwpls_wflow</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="fu">select_best</span><span class="op">(</span><span class="va">lwpls_res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">last_fit</span><span class="op">(</span><span class="va">meats_split</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -190,7 +197,7 @@
 <span><span class="co">#&gt; 1 rmse    standard       1.38  pre0_mod0_post0</span></span>
 <span><span class="co">#&gt; 2 rsq     standard       0.978 pre0_mod0_post0</span></span></code></pre></div>
 <p>Each prediction comes from its own local model. <code><a href="reference/lwpls_local.html">lwpls_local()</a></code> returns these models with their diagnostics; for example, their regression vectors along the spectrum (100 channels between 850 and 1050 nm) show how the bands used change with the water content:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_fit</span> <span class="op">&lt;-</span> <span class="va">lwpls_wflow</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">finalize_workflow</span><span class="op">(</span><span class="fu">select_best</span><span class="op">(</span><span class="va">lwpls_res</span>, metric <span class="op">=</span> <span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">fit</span><span class="op">(</span><span class="fu">training</span><span class="op">(</span><span class="va">meats_split</span><span class="op">)</span><span class="op">)</span></span>
@@ -264,6 +271,7 @@
 <li><a href="https://github.com/ChristianGoueguel/lwpls/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/ChristianGoueguel/lwpls/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a></li>
 <li><a href="https://app.codecov.io/gh/ChristianGoueguel/lwpls" class="external-link"><img src="https://codecov.io/gh/ChristianGoueguel/lwpls/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://christiangoueguel.r-universe.dev/lwpls" class="external-link"><img src="https://christiangoueguel.r-universe.dev/badges/lwpls" alt="r-universe"></a></li>
 </ul>
 </div>
 

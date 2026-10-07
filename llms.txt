@@ -48,13 +48,30 @@ relationships.
 
 ## Installation
 
-Install the development version from [GitHub](https://github.com/) with:
+Install a prebuilt binary from
+[r-universe](https://christiangoueguel.r-universe.dev/lwpls), which
+needs no compiler:
+
+``` r
+
+install.packages(
+  "lwpls",
+  repos = c("https://christiangoueguel.r-universe.dev", "https://cloud.r-project.org")
+)
+```
+
+Or build the development version from
+[GitHub](https://github.com/ChristianGoueguel/lwpls) with:
 
 ``` r
 
 # install.packages("pak")
 pak::pak("ChristianGoueguel/lwpls")
 ```
+
+Building from source compiles C++ code, so it needs the R compiler
+tools. On macOS, that includes gfortran from
+<https://mac.r-project.org/tools/>.
 
 ## Example
 
