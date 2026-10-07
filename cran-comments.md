@@ -4,6 +4,10 @@
 
 * This is a new submission.
 
+* Possibly misspelled words in DESCRIPTION: Bevilacqua, Hoffmann, Marini and
+  Serneels are author names, "et al." is the standard abbreviation, and LW is
+  part of LW-PLS (locally-weighted partial least squares).
+
 * On Linux, the installed size is about 7.7 Mb (sub-directories of 1Mb or
   more: libs 4.5Mb, doc 2.3Mb). The libs directory holds the compiled
   'RcppArmadillo' prediction kernel, and the doc directory holds four vignettes
@@ -14,6 +18,7 @@
 * local macOS (aarch64), R 4.6.1
 * GitHub Actions: macOS (release), Windows (release), Ubuntu (devel, release,
   oldrel-1)
+* win-builder (devel)
 
 ## Notes for the reviewer
 
