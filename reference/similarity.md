@@ -34,6 +34,10 @@ A `qual_param` object (see
   accounts for the relationships among the predictors and between the
   predictors and the outcome(s).
 
+See
+[`vignette("similarity")`](https://christiangoueguel.com/lwpls/articles/similarity.md)
+for how to choose between them.
+
 ## References
 
 Hazama, K. and Kano, M. (2015). Covariance-based locally weighted

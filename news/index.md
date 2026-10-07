@@ -44,6 +44,12 @@
   `localization` (interactive on the package website, with plotly as a
   new suggested package).
 
+- New vignette,
+  [`vignette("similarity")`](https://christiangoueguel.com/lwpls/articles/similarity.md),
+  on choosing a similarity index: the geometry of the Euclidean and
+  covariance-based distances, and simulations showing when each one
+  works best.
+
 ## lwpls 0.2.1
 
 ### New features

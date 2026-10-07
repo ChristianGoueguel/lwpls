@@ -8,3 +8,5 @@
   lwpls](https://christiangoueguel.com/lwpls/articles/lwpls.md):
 - [Robust and sparse
   LW-PLS](https://christiangoueguel.com/lwpls/articles/robust-sparse.md):
+- [Choosing a similarity
+  index](https://christiangoueguel.com/lwpls/articles/similarity.md):
