@@ -290,7 +290,9 @@ do.call(rbind, best_by_index)[, c("similarity", "num_comp", "localization", "mea
 
 On these spectra, the two indexes perform similarly. Hazama and Kano found
 CbLW-PLS to give the best predictions in two industrial applications, so it is
-worth including in the tuning grid.
+worth including in the tuning grid. `vignette("similarity")` explains how the
+two indexes shape the neighborhoods and shows, with simulated spectra, when
+each one works best.
 
 ## Classification
 

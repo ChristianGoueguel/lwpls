@@ -30,6 +30,8 @@ covariance direction \eqn{\Gamma = X^\top Y / \lVert X^\top Y \rVert}{Gamma = X'
 for the relationships among the predictors and between the predictors and
 the outcome(s).
 }
+
+See \code{vignette("similarity")} for how to choose between them.
 }
 \examples{
 similarity()

@@ -12,6 +12,8 @@
 #'   for the relationships among the predictors and between the predictors and
 #'   the outcome(s).
 #'
+#' See `vignette("similarity")` for how to choose between them.
+#'
 #' @param values A character vector of possible similarity indexes.
 #' @return A `qual_param` object (see [dials::new_qual_param()]).
 #' @references
