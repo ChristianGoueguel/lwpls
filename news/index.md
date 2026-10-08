@@ -2,7 +2,7 @@
 
 ## lwpls 0.3.0
 
-- First CRAN release.
+- CRAN submission.
 
 ### New features
 
