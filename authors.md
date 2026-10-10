@@ -4,9 +4,6 @@
 
 - **Christian L. Goueguel**. Author, maintainer.
 
-- **Hiromasa Kaneko**. Copyright holder.  
-  reference LW-PLS implementation transcribed in the tests
-
 ## Citation
 
 Source:
