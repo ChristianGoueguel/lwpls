@@ -26,10 +26,5 @@ Authors:
   \item Christian L. Goueguel \email{christian.goueguel@gmail.com}
 }
 
-Other contributors:
-\itemize{
-  \item Hiromasa Kaneko (reference LW-PLS implementation transcribed in the tests) [copyright holder]
-}
-
 }
 \keyword{internal}
