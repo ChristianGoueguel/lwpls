@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![CRAN status](https://www.r-pkg.org/badges/version/lwpls)](https://CRAN.R-project.org/package=lwpls)
 [![R-CMD-check](https://github.com/ChristianGoueguel/lwpls/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ChristianGoueguel/lwpls/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
@@ -57,7 +58,14 @@ relationships.
 
 ## Installation
 
-Install a prebuilt binary from
+Install the released version from
+[CRAN](https://CRAN.R-project.org/package=lwpls):
+
+``` r
+install.packages("lwpls")
+```
+
+Install the development version as a prebuilt binary from
 [r-universe](https://christiangoueguel.r-universe.dev/lwpls), which
 needs no compiler:
 
@@ -68,8 +76,8 @@ install.packages(
 )
 ```
 
-Or build the development version from
-[GitHub](https://github.com/ChristianGoueguel/lwpls) with:
+Or build it from [GitHub](https://github.com/ChristianGoueguel/lwpls)
+with:
 
 ``` r
 # install.packages("pak")
