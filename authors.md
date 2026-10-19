@@ -4,10 +4,13 @@
 
 - **Christian L. Goueguel**. Author, maintainer.
 
+- **Hiromasa Kaneko**. Copyright holder.  
+  reference LW-PLS implementation transcribed in the tests
+
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/ChristianGoueguel/lwpls/blob/master/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/ChristianGoueguel/lwpls/blob/0.3.0/DESCRIPTION)
 
 Goueguel C (2026). *lwpls: Locally-Weighted Partial Least Squares for
 'tidymodels'*. R package version 0.3.0,

@@ -2,7 +2,9 @@
 
 ## lwpls 0.3.0
 
-- CRAN submission.
+CRAN release: 2026-10-18
+
+- First CRAN release.
 
 ### New features
 
