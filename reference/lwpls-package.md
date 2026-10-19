@@ -38,8 +38,3 @@ Useful links:
 Authors:
 
 - Christian L. Goueguel <christian.goueguel@gmail.com>
-
-Other contributors:
-
-- Hiromasa Kaneko (reference LW-PLS implementation transcribed in the
-  tests) \[copyright holder\]

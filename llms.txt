@@ -48,7 +48,15 @@ relationships.
 
 ## Installation
 
-Install a prebuilt binary from
+Install the released version from
+[CRAN](https://CRAN.R-project.org/package=lwpls):
+
+``` r
+
+install.packages("lwpls")
+```
+
+Install the development version as a prebuilt binary from
 [r-universe](https://christiangoueguel.r-universe.dev/lwpls), which
 needs no compiler:
 
@@ -60,8 +68,8 @@ install.packages(
 )
 ```
 
-Or build the development version from
-[GitHub](https://github.com/ChristianGoueguel/lwpls) with:
+Or build it from [GitHub](https://github.com/ChristianGoueguel/lwpls)
+with:
 
 ``` r
 

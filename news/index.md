@@ -4,7 +4,7 @@
 
 CRAN release: 2026-10-18
 
-- First CRAN release.
+- CRAN submission.
 
 ### New features
 
